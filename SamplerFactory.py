@@ -5,4 +5,4 @@ class SamplerFactory:
 
     @staticmethod
     def get_sampler(sampler_type):
-        return Sampler(sampler_type)
+        return Sampler()

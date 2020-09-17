@@ -26,17 +26,19 @@ class StocksLearner:
         print("\t" + str(y_prediction))
         print()
 
-    def split_samples(self):
-        pass
+    def split_samples(self, X, y):
+        return X[:len(X) // 2], y[:len(y) // 2], X[len(X) // 2:], y[len(y) // 2:]
 
     def run(self, X, y):
         X_train, y_train, X_test, y_test = self.split_samples(X, y)
         self.fit(X_train, y_train)
         prediction = self.predict(X_test)
         score = self.score(X_test, y_test)
-        samples_ids_list = range(y_test)
+        samples_ids_list = range(len(y_test))
         self.print_result_table(samples_ids_list, y_test, prediction)
         print("score -->  ", score)
+        return score
+
 
 if __name__ == '__main__':
     stocksLearner = StocksLearner()
