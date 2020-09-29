@@ -6,7 +6,7 @@ import re
 from urllib.request import urlopen
 import os.path
 from tqdm import tqdm
-from src.sqlUtils import getConnectionCursor
+from utils.sqlUtils import getConnectionCursor
 
 features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3",
                  "Research And Development Expenses": "4", "SG&A Expenses": "5",

@@ -1,5 +1,9 @@
 from RawSample import RawSample
-from sqlUtils import getConnectionCursor
+from utils.sqlUtils import getConnectionCursor
+
+COMPANY_ID = 0
+DATE = 1
+SAMPLE_START = 2
 
 
 def get_samples(company_ids, features_ids, date_list):
@@ -7,17 +11,18 @@ def get_samples(company_ids, features_ids, date_list):
     sql = getSamplesSql(company_ids, features_ids, date_list)
     cursor.execute(sql)
 
-    sampleWrapperList = []
+    sample_wrapper_list = []
     for row in cursor:
-        rowList = list(row)
-        company_id = rowList[0]
-        date = rowList[1]
-        sample = rowList[2:]
+        row_list = list(row)
+        company_id = row_list[COMPANY_ID]
+        date = row_list[DATE]
+        sample = row_list[SAMPLE_START:]
         sampleWrapper = RawSample(company_id, date, sample)
-        sampleWrapperList.append(sampleWrapper)
-    return sampleWrapperList
+        sample_wrapper_list.append(sampleWrapper)
+    return sample_wrapper_list
 
     # return cursor.fetchall()
+
 
 
 # [1,2] -> "t.feature1, t.feature2"
