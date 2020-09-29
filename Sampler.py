@@ -16,7 +16,7 @@ class Sampler:
 
         for raw_sample in raw_samples:
             if self.validate_sample(raw_sample):
-                response = self.get_response(raw_sample.ticker, raw_sample.date)
+                response = self.get_response(raw_sample.company_id, raw_sample.date)
                 X.append(raw_sample.sample)
                 y.append(response)
 
