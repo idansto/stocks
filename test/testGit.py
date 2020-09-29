@@ -1,7 +1,7 @@
 class TestDAO:
 
     def test_1(self):
-        print("hello")
+        print("hello1")
 
     def test_1(self):
         print("world_check")
