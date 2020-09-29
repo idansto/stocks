@@ -1,6 +1,5 @@
 import yfinance as yf
 from SamplerDao import *
-from RawSample import *
 
 
 class Sampler:
@@ -25,9 +24,9 @@ class Sampler:
 
     @staticmethod
     def get_response(ticker, date):
-        data = yf.download(ticker, start=date,end = date, period="1d", interval="1d")
+        data = yf.download(ticker, start=date, end=date, period="1d", interval="1d")
         print(data)
-        return  float(data["Open"])
+        return float(data["Open"])
 
     @staticmethod
     def validate_sample(sample):
