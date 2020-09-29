@@ -4,4 +4,4 @@ class TestDAO:
         print("hello2")
 
     def test_1(self):
-        print("world")
+        print("world_check")
