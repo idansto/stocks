@@ -3,10 +3,10 @@ import mysql.connector
 
 def getConnectionCursor():
     connection = mysql.connector.connect(
-        host="localhost",
+        host="192.168.1.173",
         user="ariel",
         password="ariel",
         database="shares"
     )
-    mycursor = connection.cursor()
-    return connection, mycursor
+    my_cursor = connection.cursor()
+    return connection, my_cursor
