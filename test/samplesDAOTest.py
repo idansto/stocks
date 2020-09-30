@@ -31,6 +31,7 @@ class TestDAO(unittest.TestCase):
 
     def test_get_samples(self):
         sampleList = get_samples([1,2], [3,4], ["2020-3-31","2020-6-30"])
+        self.assertEqual("[company_id = 1, ticker = AAPL, date = 2020-3-31, sample = [22370.0, 4565.0], company_id = 2, ticker = GOOGL, date = 2020-3-31, sample = [22177.0, 6820.0], company_id = 1, ticker = AAPL, date = 2020-6-30, sample = [22680.0, 4758.0], company_id = 2, ticker = GOOGL, date = 2020-6-30, sample = [19744.0, 6875.0]]", str(sampleList))
         print(sampleList)
 
 

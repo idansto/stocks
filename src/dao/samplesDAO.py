@@ -2,8 +2,9 @@ from src.RawSample import RawSample
 from src.utils.sqlUtils import get_connection_cursor
 
 COMPANY_ID = 0
-DATE = 1
-SAMPLE_START = 2
+TICKER = 1
+DATE = 2
+SAMPLE_START = 3
 
 
 def get_samples(company_ids, features_ids, date_list):
@@ -15,9 +16,10 @@ def get_samples(company_ids, features_ids, date_list):
     for row in cursor:
         row_list = list(row)
         company_id = row_list[COMPANY_ID]
+        ticker = row_list[TICKER]
         date = row_list[DATE]
         sample = row_list[SAMPLE_START:]
-        sampleWrapper = RawSample(company_id, date, sample)
+        sampleWrapper = RawSample(company_id, ticker, date, sample)
         sample_wrapper_list.append(sampleWrapper)
     return sample_wrapper_list
 
@@ -39,7 +41,7 @@ def getSamplesSql(company_ids, features_ids, date_list):
     features = create_features_select_list(features_ids)
     companies = create_companies(company_ids)
     first_feature = id_to_feature_id(features_ids[0])
-    sql = "select t.id, t.date, {} from (SELECT c.id, dates.date, {} from shares.companies c, ({}) as dates where c.id in ({})) as t where {} is not null;".format(
+    sql = "select t.id, t.ticker, t.date, {} from (SELECT c.id, c.ticker, dates.date, {} from shares.companies c, ({}) as dates where c.id in ({})) as t where {} is not null;".format(
         small_features, features, dates, companies, first_feature)
     return sql
 

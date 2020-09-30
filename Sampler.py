@@ -53,7 +53,7 @@ class Sampler:
         X = []
         y = []
         companies_ids = [3,22]
-        start_date = "2020-03-31"
+        start_date = "2018-03-31"
         end_date = "2020-06-30"
         date_list = get_dates_between(start_date, end_date)
         features_ids = [3,4]
