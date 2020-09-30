@@ -1,5 +1,5 @@
 from src.RawSample import RawSample
-from src.utils.sqlUtils import getConnectionCursor
+from src.utils.sqlUtils import get_connection_cursor
 
 COMPANY_ID = 0
 DATE = 1
@@ -7,7 +7,7 @@ SAMPLE_START = 2
 
 
 def get_samples(company_ids, features_ids, date_list):
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     sql = getSamplesSql(company_ids, features_ids, date_list)
     cursor.execute(sql)
 
