@@ -5,6 +5,7 @@ class RawSample:
 
     def __init__(self, company_id, date, sample):
         self.company_id = company_id
+        self.ticker = "MSFT"
         self.date = date
         self.sample = sample
 

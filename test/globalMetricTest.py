@@ -2,6 +2,7 @@ import unittest
 
 from dao.globalMetric import populate_Federal_Funds_Rate
 
+
 class TestDAO(unittest.TestCase):
 
     def test_populate_Federal_Funds_Rate(self):
