@@ -1,7 +1,7 @@
 import mysql.connector
 
 
-def getConnectionCursor():
+def get_connection_cursor():
     connection = mysql.connector.connect(
         host="192.168.1.173",
         user="ariel",

@@ -6,7 +6,7 @@ import re
 from urllib.request import urlopen
 import os.path
 from tqdm import tqdm
-from utils.sqlUtils import getConnectionCursor
+from src.utils.sqlUtils import get_connection_cursor
 
 features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3",
                  "Research And Development Expenses": "4", "SG&A Expenses": "5",
@@ -117,7 +117,7 @@ def printStockScreenHeaders():
 
 def fillDBCompanies():
     data = getJsonFromFile('../resources/stock-screener.json')
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     tickerMax = comp_nameMax = comp_name_2Max = exchangeMax = zacks_x_ind_descMax = zacks_x_sector_descMax = zacks_m_ind_descMax = emp_cntMax = 0
 
     for dic in data:
@@ -161,7 +161,7 @@ def getJsonFromFile(fileName):
 
 def fillDBFeatures():
     data = getJsonFromFile('../resources/MSFT.json')
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     for dic in data:
         link = dic['field_name']
         featureName = extractFeautre(link)
@@ -192,7 +192,7 @@ def printFeautres():
 
 
 def tickerCompanyNameIterator():
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     sql = "select c.ticker, c.comp_name from shares.companies c"
     cursor.execute(sql)
     return cursor.fetchall()
@@ -202,7 +202,7 @@ def tickerCompanyNameIterator():
 
 
 def company_iterator():
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     sql = "select c.id, c.ticker, c.comp_name from shares.companies c where c.ticker >= 'CLUB'"
     cursor.execute(sql)
     return cursor.fetchall()
@@ -222,7 +222,7 @@ def get_feature_id(feature_name):
 
 
 def populate_db_financial_statements():
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     for (company_id, ticker, company_name) in tqdm(company_iterator()):
         json = getJsonFromMacrotrends(ticker, company_name)
         if (json):
@@ -249,7 +249,7 @@ def is_date(key):
 
 # features_dict = {'revenue': '1', 'sales': '2'}
 def print_feature_dict():
-    connection, cursor = getConnectionCursor()
+    connection, cursor = get_connection_cursor()
     sql = "select f.id, f.name from shares.features f"
     cursor.execute(sql)
     print("features_dict = {", end='')

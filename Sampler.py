@@ -1,10 +1,49 @@
 import yfinance as yf
-from SamplerDao import *
+# from SamplerDao import *
 from src.dao.samplesDAO import get_samples
 
 
+def next_quarter_date_after(date):
+    date_components_list = date.split(sep='-')
+    year = int(date_components_list[0])
+    month = int(date_components_list[1])
+    day = int(date_components_list[2])
+    # if day == 30 and (month == 6 or month == 9):
+    #     return date
+    # if day == 31 and (month == 3 or month == 12):
+    #     return date
+    if month == 3:
+        return str(year) + '-06-30'
+    if month == 6:
+        return str(year) + '-09-30'
+    if month == 9:
+        return str(year) + '-12-31'
+    if month == 12:
+        return str(year + 1) + '-03-31'
+
+
 def get_dates_between(start_date, end_date):  # TODO
-    return ["2020-03-30", "2020-06-30"]
+
+    # start_year = int(start_date.split(sep='-')[0])
+    # start_month = int(start_date.split(sep='-')[1])
+    # start_day = int(start_date.split(sep='-')[2])
+    #
+    # end_year = int(start_date.split(sep='-')[0])
+    # end_month = int(start_date.split(sep='-')[1])
+    # end_day = int(start_date.split(sep='-')[2])
+
+    dates_list = []
+    # current_year = start_year
+    # current_month = start_month
+    # current_day = start_day
+    dates_list.append(start_date)
+    current_date = start_date
+    next_quarter_date = next_quarter_date_after(current_date)
+    while next_quarter_date <= end_date:
+        dates_list.append(next_quarter_date)
+        next_quarter_date = next_quarter_date_after(next_quarter_date)
+
+    return dates_list
 
 
 class Sampler:
@@ -14,7 +53,7 @@ class Sampler:
         X = []
         y = []
         companies_ids = [1, 4, 9, 22]
-        start_date = "2020-03-30"
+        start_date = "2020-03-31"
         end_date = "2020-06-30"
         date_list = get_dates_between(start_date, end_date)
         features_ids = [3, 6]
@@ -38,3 +77,8 @@ class Sampler:
     @staticmethod
     def validate_sample(sample):
         return True
+
+
+if __name__ == '__main__':
+    dates_list = get_dates_between("2019-03-31", "2020-06-30")
+    print(dates_list)
