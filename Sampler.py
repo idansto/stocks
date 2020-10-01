@@ -1,6 +1,8 @@
 import yfinance as yf
-# from SamplerDao import *
+import datetime
 from src.dao.samplesDAO import get_samples
+import pandas as pd
+from tqdm import tqdm
 
 
 def next_quarter_date_after(date):
@@ -50,29 +52,45 @@ class Sampler:
     # sampler_dao = SamplerDao()
 
     def get_samples_and_responses(self, source):
+        print("builds samples and responses:" + '\n')
         X = []
         y = []
-        companies_ids = [3,22]
-        start_date = "2018-03-31"
-        end_date = "2020-06-30"
+        companies_ids = [2]
+        start_date = "2018-12-31"
+        end_date = "2019-12-31"
         date_list = get_dates_between(start_date, end_date)
-        features_ids = [3,4]
+        features_ids = [1, 2]
         # raw_samples = self.sampler_dao.get_samples(companies_ids, start_date, end_date, features_ids)
         raw_samples = get_samples(companies_ids, features_ids, date_list)
 
-        for raw_sample in raw_samples:
+        for raw_sample in tqdm(raw_samples):
+            # print(raw_sample.date)
             if self.validate_sample(raw_sample):
                 response = self.get_response(raw_sample.ticker, raw_sample.date)
                 X.append(raw_sample.sample)
                 y.append(response)
-        print(X)
-        print(y)
+
+        self.print_samples(X, y)
+
         return X, y
+
+    def print_samples(self, X, y):
+        X_df = pd.DataFrame(X)
+        y_df = pd.DataFrame(y)
+        print("samples: ")
+        print(X_df.transpose())
+        print("responses: ")
+        print(y_df)
 
     @staticmethod
     def get_response(ticker, date):
-        data = yf.download(ticker, start=date, end=date, period="1d", interval="1d") # MSFT is bad HARDCODED
-        return float(data["Open"])
+        date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+        while date_obj.weekday() > 4:
+            date_obj += datetime.timedelta(days=1)
+        data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1), period="1d",
+                           interval="1d")
+        data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1))
+        return float(data["Open"][0])
 
     @staticmethod
     def validate_sample(sample):

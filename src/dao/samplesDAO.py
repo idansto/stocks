@@ -1,5 +1,6 @@
 from src.RawSample import RawSample
 from src.utils.sqlUtils import get_connection_cursor
+from tqdm import tqdm
 
 COMPANY_ID = 0
 TICKER = 1
@@ -13,14 +14,14 @@ def get_samples(company_ids, features_ids, date_list):
     cursor.execute(sql)
 
     sample_wrapper_list = []
-    for row in cursor:
+    for row in tqdm(cursor):
         row_list = list(row)
         company_id = row_list[COMPANY_ID]
         ticker = row_list[TICKER]
         date = row_list[DATE]
         sample = row_list[SAMPLE_START:]
-        sampleWrapper = RawSample(company_id, ticker, date, sample)
-        sample_wrapper_list.append(sampleWrapper)
+        sample_wrapper = RawSample(company_id, ticker, date, sample)
+        sample_wrapper_list.append(sample_wrapper)
     return sample_wrapper_list
 
     # return cursor.fetchall()

@@ -31,7 +31,6 @@ class Controller:
         samples_type = self.get_samples_type()
         stocks_learner_type = self.get_stocks_learner_type()
         score = self.evaluate_learning_method(samples_type, stocks_learner_type)
-        print('Score: ', score)
 
 
 if __name__ == '__main__':

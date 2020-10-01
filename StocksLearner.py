@@ -1,5 +1,6 @@
-from sklearn.neural_network import MLPRegressor
+# from sklearn.neural_network import MLPRegressor
 from sklearn.linear_model import LinearRegression
+import pandas as df
 
 
 class StocksLearner:
@@ -19,7 +20,7 @@ class StocksLearner:
     def print_result_table(self, ids_list, y_true, y_prediction):
         result = [ids_list, y_true, y_prediction]
 
-        print("3. printing result table (: ")
+        print('\n' + "result table: ")  # TODO: print result brightly
         print()
         print("\t" + str(list(ids_list)))
         print("\t" + str(y_true))
@@ -41,5 +42,4 @@ class StocksLearner:
 
 
 if __name__ == '__main__':
-    stocksLearner = StocksLearner()
-    stocksLearner.run()
+    pass
