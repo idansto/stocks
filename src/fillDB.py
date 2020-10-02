@@ -51,7 +51,7 @@ def getTickerInfo(tickerName):
 
 
 def getCompanyName(tickerName):
-    file = open('tickersInfo.json', 'r')
+    file = open('resources/tickersInfo.json', 'r')
     fileText = file.read()
     data = json.loads(fileText)
     for dic in data:

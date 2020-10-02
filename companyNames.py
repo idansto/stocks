@@ -2,7 +2,7 @@ import json
 
 
 def get_all_company_names():
-    file = open('tickersInfo.json', 'r')
+    file = open('resources/tickersInfo.json', 'r')
     json_obj = json.load(file)
     dic = dict()
     for tickerInfo in json_obj:
