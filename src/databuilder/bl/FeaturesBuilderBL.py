@@ -26,6 +26,7 @@ def print_feature_dict():
         print('"', name, '": ', '"', id, '", ', sep='', end='')
     print("}")
 
+##################################################################################################
 
 def printFeautresTRY():
     data = getJsonFromFile('../../../resources/MSFT.json')

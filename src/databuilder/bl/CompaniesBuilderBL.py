@@ -40,8 +40,9 @@ def fillDBCompaniesFromJsonFile():
     print(*val, sep=",")
     connection.commit()
 
+#########################################################################################################
 
-def printCompaniesStockScreenHeadersTry():
+def printCompaniesStockScreenHeadersTRY():
     file = open('../../../resources/stock-screener.json', 'r')
     fileText = file.read()
     data = json.loads(fileText)

@@ -5,6 +5,7 @@ from urllib.request import urlopen
 
 from tqdm import tqdm
 
+
 # "<a href='/stocks/charts/MSFT/microsoft/revenue'>Revenue</a>
 from sampler.dao.CompaniesDAO import company_iterator
 from sampler.dao.FeaturesDAO import get_feature_id
@@ -13,6 +14,8 @@ from utils.FileUtils import writeToFileAsJSON
 from utils.SqlUtils import get_connection_cursor
 from utils.StrUtils import getString
 
+feature_name_pattern = re.compile('[^>]+>(.+)<')
+original_data_pattern = re.compile('var originalData = (.+);\s+var source =')
 
 def extractFeautreName(link):
     found = feature_name_pattern.match(link)
@@ -39,40 +42,6 @@ def populate_db_financial_statements():
                             val = [company_id, feature_id, date, value, value]
                             cursor.execute(sql, val)
                 connection.commit()
-
-
-def getCompanyNameFromJsonFileTry(tickerName):
-    file = open('resources/tickersInfo.json', 'r')
-    fileText = file.read()
-    data = json.loads(fileText)
-    for dic in data:
-        if dic["ticker"] == tickerName:
-            return dic["comp_name"]
-
-    return 'unknown'
-
-
-def getTickersInfoTRY(list):
-    dic = dict()
-    for ticker in list:
-        tickerInfo = getTickerInfoFromJsonFileTRY(ticker)
-        dic[ticker] = tickerInfo
-    return dic
-
-
-def getTickerInfoFromJsonFileTRY(tickerName):
-    tickerFileName = 'resources\\' + tickerName + '.json'
-    if os.path.isfile(tickerFileName):
-        file = open(tickerFileName, 'r')
-        fileText = file.read()
-        data = json.loads(fileText)
-    else:
-        companyName = getCompanyNameFromJsonFileTry(tickerName)
-        print(f'loading {companyName} ticker: {tickerName} info')
-        jsonStr = getTextFromMacrotrends(tickerName, companyName)
-        data = json.loads(jsonStr)
-        writeToFileAsJSON(data, tickerFileName)
-    return data
 
 
 # url pattern example: "https://www.macrotrends.net/stocks/charts/MSFT/microsoft/income-statement?freq=Q"
@@ -116,5 +85,36 @@ def extractOriginalData(text):
     # return found
 
 
-feature_name_pattern = re.compile('[^>]+>(.+)<')
-original_data_pattern = re.compile('var originalData = (.+);\s+var source =')
+#################################################################################################
+
+def getCompanyNameFromJsonFileTRY(tickerName):
+    file = open('resources/tickersInfo.json', 'r')
+    fileText = file.read()
+    data = json.loads(fileText)
+    for dic in data:
+        if dic["ticker"] == tickerName:
+            return dic["comp_name"]
+
+    return 'unknown'
+
+def getTickersInfoTRY(list):
+    dic = dict()
+    for ticker in list:
+        tickerInfo = getTickerInfoFromJsonFileTRY(ticker)
+        dic[ticker] = tickerInfo
+    return dic
+
+
+def getTickerInfoFromJsonFileTRY(tickerName):
+    tickerFileName = 'resources\\' + tickerName + '.json'
+    if os.path.isfile(tickerFileName):
+        file = open(tickerFileName, 'r')
+        fileText = file.read()
+        data = json.loads(fileText)
+    else:
+        companyName = getCompanyNameFromJsonFileTRY(tickerName)
+        print(f'loading {companyName} ticker: {tickerName} info')
+        jsonStr = getTextFromMacrotrends(tickerName, companyName)
+        data = json.loads(jsonStr)
+        writeToFileAsJSON(data, tickerFileName)
+    return data
