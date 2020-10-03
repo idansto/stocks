@@ -1,6 +1,5 @@
 from sampler.bl.SamplerBL import *
 
-
 class SamplerFactory:
 
     @staticmethod
