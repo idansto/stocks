@@ -4,7 +4,7 @@ from csv import reader
 def populate_global_metric_data():
     pass
 
-def populate_Federal_Funds_Rate():
+def populate_Federal_Funds_Rate_from_json():
     # (connection, cursor) = get_connection_cursor()
     with open('../resources/fed-funds-rate-historical-chart.csv', 'r') as file:
         csv_reader = reader(file)

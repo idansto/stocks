@@ -28,7 +28,8 @@ def print_feature_dict():
 
 ##################################################################################################
 
-def printFeautresTRY():
+
+def printFeautresTRY() -> None:
     data = getJsonFromFile('../../../resources/MSFT.json')
     maxSize = 0
     for dic in data:
@@ -37,5 +38,6 @@ def printFeautresTRY():
         print(featureName)
         maxSize = max(maxSize, len(featureName))
     print('maxsize = ', maxSize, len(data))
+
 
 

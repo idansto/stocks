@@ -1,6 +1,7 @@
 import json
 import os.path
 import re
+from typing import Optional, Any
 from urllib.request import urlopen
 
 from tqdm import tqdm
@@ -15,11 +16,11 @@ from utils.SqlUtils import get_connection_cursor
 from utils.StrUtils import getString
 
 feature_name_pattern = re.compile('[^>]+>(.+)<')
-original_data_pattern = re.compile('var originalData = (.+);\s+var source =')
+original_data_pattern = re.compile('var originalData = (.+);\\s+var source =')
 
 def extractFeautreName(link):
     found = feature_name_pattern.match(link)
-    if (found):
+    if found:
         found = found.group(1)
     return found
 
@@ -27,7 +28,7 @@ def extractFeautreName(link):
 def populate_db_financial_statements():
     connection, cursor = get_connection_cursor()
     for (company_id, ticker, company_name) in tqdm(company_iterator()):
-        json = getJsonFromMacrotrends(ticker, company_name)
+        json: Optional[Any] = getJsonFromMacrotrends(ticker, company_name)
         if (json):
             for dic in json:
                 link = dic['field_name']
@@ -59,14 +60,14 @@ def getTextFromMacrotrends(tickerName, companyName):
         return None
 
 
-def getJsonFromMacrotrends(tickerName, companyName):
+def getJsonFromMacrotrends(tickerName, companyName) -> object:
     jsonStr = getTextFromMacrotrends(tickerName, companyName)
     if (jsonStr):
         return json.loads(jsonStr)
     return None
 
 
-def extractOriginalData(text):
+def extractOriginalData(text: object) -> object:
     match = original_data_pattern.search(text)
     # match = re.search('var originalData = (.+);\s+var source =', text)
     if (match):
