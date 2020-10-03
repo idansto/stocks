@@ -1,4 +1,4 @@
-from dto.RawSample import *
+from sampler.dto.RawSample import *
 
 
 class SamplerDao:

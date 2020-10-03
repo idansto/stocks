@@ -1,5 +1,5 @@
-from SamplerFactory import *
-from StocksLearnerFactory import *
+from sampler.bl.SamplerFactory import *
+from learner.bl.StocksLearnerFactory import *
 
 
 class Controller:

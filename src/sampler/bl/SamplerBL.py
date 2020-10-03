@@ -1,6 +1,6 @@
 import yfinance as yf
 import datetime
-from src.dao.samplesDAO import get_samples
+from sampler.dao.samplesDAO import get_samples
 import pandas as pd
 from tqdm import tqdm
 

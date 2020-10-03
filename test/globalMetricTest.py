@@ -1,6 +1,6 @@
 import unittest
 
-from dao.globalMetricDAO import populate_Federal_Funds_Rate
+from sampler.dao.globalMetricDAO import populate_Federal_Funds_Rate
 
 
 class TestDAO(unittest.TestCase):

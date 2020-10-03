@@ -1,4 +1,4 @@
-from dto.RawSample import RawSample
+from sampler.dto.RawSample import RawSample
 from src.utils.sqlUtils import get_connection_cursor
 from tqdm import tqdm
 
