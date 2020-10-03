@@ -1,6 +1,3 @@
-def get_feature_id(feature_name):
-    return features_dict[feature_name]
-
 
 features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3",
                  "Research And Development Expenses": "4", "SG&A Expenses": "5",
@@ -10,3 +7,8 @@ features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3",
                  "Income From Discontinued Operations": "15", "Net Income": "16", "EBITDA": "17", "EBIT": "18",
                  "Basic Shares Outstanding": "19", "Shares Outstanding": "20", "Basic EPS": "21",
                  "EPS - Earnings Per Share": "22"}
+
+def get_feature_id(feature_name):
+    return features_dict[feature_name]
+
+
