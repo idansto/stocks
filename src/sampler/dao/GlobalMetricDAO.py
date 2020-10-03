@@ -1,13 +1,13 @@
 from csv import reader
 
-from utils.sqlUtils import getConnectionCursor
+# from utils.SqlUtils import get_connection_cursor
 
 
 def populate_global_metric_data():
     pass
 
 def populate_Federal_Funds_Rate():
-    # (connection, cursor) = getConnectionCursor()
+    # (connection, cursor) = get_connection_cursor()
     with open('/resources/fed-funds-rate-historical-chart.csv', 'r') as file:
         csv_reader = reader(file)
         for row in csv_reader:

@@ -1,5 +1,5 @@
 from sampler.dto.RawSample import RawSample
-from src.utils.sqlUtils import get_connection_cursor
+from src.utils.SqlUtils import get_connection_cursor
 from tqdm import tqdm
 
 COMPANY_ID = 0

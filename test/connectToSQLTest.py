@@ -12,3 +12,6 @@ class TestDAO(unittest.TestCase):
         record = cursor.fetchall()
         count = record[0][0]
         self.assertTrue(count > 0)
+
+if __name__ == '__main__':
+    unittest.main()

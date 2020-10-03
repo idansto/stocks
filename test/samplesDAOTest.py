@@ -1,6 +1,6 @@
 import unittest
 
-from sampler.dao.samplesDAO import create_dates_table, create_features_select_list, create_companies, \
+from sampler.dao.SamplesDAO import create_dates_table, create_features_select_list, create_companies, \
     create_small_features_select_list, getSamplesSql, get_samples
 
 
