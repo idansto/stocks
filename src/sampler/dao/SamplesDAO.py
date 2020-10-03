@@ -42,8 +42,9 @@ def getSamplesSql(company_ids, features_ids, date_list):
     features = create_features_select_list(features_ids)
     companies = create_companies(company_ids)
     first_feature = id_to_feature_id(features_ids[0])
-    sql = "select t.id, t.ticker, t.date, {} from (SELECT c.id, c.ticker, dates.date, {} from shares.companies c, ({}) as dates where c.id in ({})) as t where {} is not null;".format(
-        small_features, features, dates, companies, first_feature)
+    sql = "select t.id, t.ticker, t.date, {} from (SELECT c.id, c.ticker, dates.date, {} from shares.companies c, " \
+          "({}) as dates where c.id in ({})) as t where {} is not null;".format(small_features, features, dates,
+                                                                                companies, first_feature)
     return sql
 
 
