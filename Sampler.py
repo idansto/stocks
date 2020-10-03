@@ -51,7 +51,7 @@ def get_dates_between(start_date, end_date):  # TODO
 class Sampler:
     # sampler_dao = SamplerDao()
 
-    def get_samples_and_responses(self, source):
+    def get_samples_and_responses(self):
         print("builds samples and responses:" + '\n')
         X = []
         y = []

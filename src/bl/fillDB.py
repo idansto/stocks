@@ -107,7 +107,7 @@ def getString(bytes):
 
 
 def printStockScreenHeaders():
-    file = open('../resources/stock-screener.json', 'r')
+    file = open('../../resources/stock-screener.json', 'r')
     fileText = file.read()
     data = json.loads(fileText)
     dic = data[0]
@@ -116,7 +116,7 @@ def printStockScreenHeaders():
 
 
 def fillDBCompanies():
-    data = getJsonFromFile('../resources/stock-screener.json')
+    data = getJsonFromFile('../../resources/stock-screener.json')
     connection, cursor = get_connection_cursor()
     tickerMax = comp_nameMax = comp_name_2Max = exchangeMax = zacks_x_ind_descMax = zacks_x_sector_descMax = zacks_m_ind_descMax = emp_cntMax = 0
 
@@ -160,7 +160,7 @@ def getJsonFromFile(fileName):
 
 
 def fillDBFeatures():
-    data = getJsonFromFile('../resources/MSFT.json')
+    data = getJsonFromFile('../../resources/MSFT.json')
     connection, cursor = get_connection_cursor()
     for dic in data:
         link = dic['field_name']
@@ -181,7 +181,7 @@ def extractFeautre(link):
 
 
 def printFeautres():
-    data = getJsonFromFile('../resources/MSFT.json')
+    data = getJsonFromFile('../../resources/MSFT.json')
     maxSize = 0
     for dic in data:
         link = dic['field_name']
