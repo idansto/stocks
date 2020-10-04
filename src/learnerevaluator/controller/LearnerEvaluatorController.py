@@ -1,17 +1,8 @@
-from sampler.bl.SamplerFactory import *
-from learner.bl.StocksLearnerFactory import *
+from src.sampler.bl.SamplerFactory import *
+from src.learner.bl.StocksLearnerFactory import *
 
 
 class Controller:
-    # def get_data(self, dataType):
-    #     self.data_builder = DataBuilder()  # TODO: does the controller needs to build data or not?
-    #
-    # # def get_samples(self, samples_type, source="mySQL"):
-    # #     self.samples_builder = Sampler(samples_type)
-    # #     return self.samples_builder.get_samples_and_responses(source)
-
-    # def get_stocks_list(self):
-    #     return {"AAPL": "apple", "MSFT": "microsoft"}
 
     def get_samples_type(self):
         return 1

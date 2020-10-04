@@ -1,4 +1,4 @@
-from sampler.bl.SamplerBL import *
+from src.sampler.bl.SamplerBL import *
 
 class SamplerFactory:
 

@@ -1,4 +1,4 @@
-from learner.bl.StocksLearnerBL import *
+from src.learner.bl.StocksLearnerBL import *
 
 class StocksLearnerFactory:
 
