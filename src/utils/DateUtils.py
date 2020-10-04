@@ -1,6 +1,5 @@
 import datetime
 import re
-import pandas as pd
 import pandas_market_calendars as mcal
 
 
@@ -18,6 +17,6 @@ def str_to_date(date_str):
 def next_business_day(date):
     nyse = mcal.get_calendar('NYSE')
     end_date = date + datetime.timedelta(days=5)
-    first_business_date_str = nyse.valid_days(start_date='2016-12-31', end_date=end_date)[0]
+    first_business_date_str = nyse.valid_days(start_date=date, end_date=end_date)[0]
     busienss_day = first_business_date_str.to_pydatetime().date()
     return busienss_day

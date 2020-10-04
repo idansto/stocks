@@ -23,8 +23,9 @@ class TestYahooFinance(unittest.TestCase):
         date_str = '2016-12-31'
         current_date = str_to_date(date_str)
         print(current_date)
+        print(f'current_date = {current_date}')
         next_day = next_business_day(current_date)
-        print(next_day)
+        print(f'next_day = {next_day}')
         data = yf.download("GOOG", start=next_day, end=next_day + datetime.timedelta(days=1), period="1d", interval="1d",
                    rounding=True)
         self.assertTrue(data['Open'][0], 778.81)
