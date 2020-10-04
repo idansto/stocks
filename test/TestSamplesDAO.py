@@ -1,7 +1,7 @@
 import unittest
 
 from sampler.dao.SamplesDAO import create_dates_table, create_features_select_list, create_companies, \
-    create_small_features_select_list, getSamplesSql, get_samples
+    create_small_features_select_list, getSamplesSql, get_samples, get_samples_with_abs_features
 
 
 class TestDAO(unittest.TestCase):
@@ -30,10 +30,25 @@ class TestDAO(unittest.TestCase):
         print(sql)
 
     def test_get_samples(self):
-        sampleList = get_samples([1,2], [3,4], ["2020-3-31","2020-6-30"])
+        sampleList = get_samples([1,2], ["2020-3-31","2020-6-30"], [3,4])
         self.assertEqual("[company_id = 1, ticker = AAPL, date = 2020-3-31, sample = [22370.0, 4565.0], company_id = 2, ticker = GOOGL, date = 2020-3-31, sample = [22177.0, 6820.0], company_id = 1, ticker = AAPL, date = 2020-6-30, sample = [22680.0, 4758.0], company_id = 2, ticker = GOOGL, date = 2020-6-30, sample = [19744.0, 6875.0]]", str(sampleList))
         print(sampleList)
 
+    def test_get_samples_with_abs_features(self):
+        sampleList = get_samples_with_abs_features([1,2], [3,4], [1,2,3], ["2020-3-31","2020-6-30"])
+        print(sampleList)
+        self.assertEqual("[company_id = 1, ticker = AAPL, date = 2020-3-31, sample = ['Computer and Technology', "
+                         "'COMPUTER/OFFICE EQUIP', 58313.0, 35943.0, 22370.0], company_id = 2, ticker = GOOGL, "
+                         "date = 2020-3-31, sample = ['Computer and Technology', 'COMPUTER SOFT/SERV', 41159.0, "
+                         "18982.0, 22177.0], company_id = 1, ticker = AAPL, date = 2020-6-30, sample = ['Computer and "
+                         "Technology', 'COMPUTER/OFFICE EQUIP', 59685.0, 37005.0, 22680.0], company_id = 2, "
+                         "ticker = GOOGL, date = 2020-6-30, sample = ['Computer and Technology', 'COMPUTER "
+                         "SOFT/SERV', 38297.0, 18553.0, 19744.0]]", str(sampleList))
+
+    def test1(self):
+        feature = "sdsdf"
+        sql = f"select from {feature}"
+        print(sql)
 
 if __name__ == '__main__':
     unittest.main()
