@@ -5,6 +5,9 @@ import pandas as pd
 from tqdm import tqdm
 import numpy as np
 
+from utils import DateUtils
+from utils.DateUtils import next_business_day, str_to_date
+
 
 def next_quarter_date_after(date):
     date_components_list = date.split(sep='-')
@@ -33,9 +36,7 @@ def get_quraterly_dates_between(start_date, end_date):  # TODO
     # end_day = int(start_date.split(sep='-')[2])
 
     dates_list = []
-    # current_year = start_year
-    # current_month = start_month
-    # current_day = start_day
+
     dates_list.append(start_date)
     current_date = start_date
     next_quarter_date = next_quarter_date_after(current_date)
@@ -84,11 +85,11 @@ class Sampler:
         # print(X[12])
         X = []
         y = []
-        companies_ids = [2]
-        start_date = "2018-12-31"
-        end_date = "2019-12-31"
+        companies_ids = [1, 2, 3, 4, 5, 6, 10]
+        start_date = "2012-09-30"
+        end_date = "2020-3-30"
         date_list = get_quraterly_dates_between(start_date, end_date)
-        features_ids = [1, 2, 3, 4]
+        features_ids = [1, 4, 5, 2, 3, 7]
         raw_samples = get_samples(companies_ids, features_ids, date_list)
 
         for raw_sample in tqdm(raw_samples):
@@ -97,8 +98,10 @@ class Sampler:
                 X.append(raw_sample.sample)
                 y.append(response)
 
-        X_df = pd.DataFrame(X, columns=features_ids, index=date_list)
-        y_df = pd.DataFrame(y, index=date_list, columns=["Price"])
+        # X_df = pd.DataFrame(X, columns=features_ids, index=cartesian_product_of_dates_and_companies) :TODO add that index
+        X_df = pd.DataFrame(X, columns=features_ids)
+        # y_df = pd.DataFrame(y, index=date_list, columns=["Price"]) :TODO add that index
+        y_df = pd.DataFrame(y, columns=["Price"])
         self.print_samples(X_df, y_df)
         return X_df, y_df
 
@@ -112,11 +115,12 @@ class Sampler:
     @staticmethod
     def get_response(ticker, date):
         date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
-        while date_obj.weekday() > 4:
-            date_obj += datetime.timedelta(days=1)
-        data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1), period="1d",
-                           interval="1d")
-        data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1))
+        # while date_obj.weekday() > 4:
+        #     date_obj += datetime.timedelta(days=1)
+        next_business_day = DateUtils.next_business_day(date_obj)
+        # data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1), period="1d",
+        #                    interval="1d")
+        data = yf.download(ticker, start=next_business_day, end=next_business_day + datetime.timedelta(days=1))
         return float(data["Open"][0])
 
     @staticmethod
@@ -125,5 +129,5 @@ class Sampler:
 
 
 if __name__ == '__main__':
-    dates_list = get_quraterly_dates_between("2018-03-31", "2020-06-30")
-    print(dates_list)
+    dates_list1 = get_quraterly_dates_between("2018-03-31", "2020-06-30")
+    print(dates_list1)

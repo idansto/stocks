@@ -2,8 +2,8 @@ import datetime
 import re
 import pandas_market_calendars as mcal
 
-
 date_pattern = re.compile("^\d{4}-\d{1,2}-\d{1,2}$")
+
 
 def is_date(key):
     result = date_pattern.match(key)
@@ -13,6 +13,7 @@ def is_date(key):
 
 def str_to_date(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+
 
 def next_business_day(date):
     nyse = mcal.get_calendar('NYSE')

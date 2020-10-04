@@ -26,9 +26,11 @@ class TestYahooFinance(unittest.TestCase):
         print(f'current_date = {current_date}')
         next_day = next_business_day(current_date)
         print(f'next_day = {next_day}')
-        data = yf.download("GOOG", start=next_day, end=next_day + datetime.timedelta(days=1), period="1d", interval="1d",
-                   rounding=True)
+        data = yf.download("GOOG", start=next_day, end=next_day + datetime.timedelta(days=1), period="1d",
+                           interval="1d",
+                           rounding=True)
         self.assertTrue(data['Open'][0], 778.81)
+
 
 if __name__ == '__main__':
     unittest.main()
