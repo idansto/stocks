@@ -8,40 +8,49 @@ def populate_global_metric_data():
     pass
 
 
-def read_till_data(csv_reader):
-    for row in csv_reader:
-        size_of_line = len(row)
-        if size_of_line == 2:
-            (date, value) = row
+def read_till_data(lines):
+    for line in lines:
+        splitted_line = date_value_line(line)
+        if (splitted_line):
+            (date, value) = tuple(splitted_line)
             if date.strip() == 'date' and value.strip() == 'value':
                 return
 
 
-def read_thru_date(csv_reader, latest_date):
-    for row in csv_reader:
-        (date_str, value) = row
+def read_thru_date(lines, latest_date):
+    for line in lines:
+        splitted_line = line.split(',')
+        (date_str, value) = splitted_line
         date = str_to_date(date_str)
         if (date > latest_date):
-            return row
+            return splitted_line
 
 
 def populate_federal_funds_rate_from_json():
     # (connection, cursor) = get_connection_cursor()
     with open('../resources/fed-funds-rate-historical-chart.csv', 'r') as file:
-        csv_reader = reader(file)
-        read_till_data(csv_reader)
+        lines = iter(file.read().splitlines())
+        read_till_data(lines)
         latest_date = get_max_date_for_metric_id(1)
-        first_new_row = read_thru_date(csv_reader, latest_date)
-        insert_row_to_global_data(first_new_row)
-        for row in csv_reader:
-            insert_row_to_global_data(row)
+        first_new_line = read_thru_date(lines, latest_date)
+        insert_row_to_global_data(first_new_line)
+        for line in lines:
+            splitted_line = date_value_line(line)
+            if (splitted_line):
+                insert_row_to_global_data(splitted_line)
     # connection.commit
     return
 
 
-def insert_row_to_global_data(row):
-    (date, value) = row
+def insert_row_to_global_data(splitted_line):
+    (date_str, value) = splitted_line
     sql = "insert (date, metric_name, value) into shares.global_data values (%s, %s, %s)"
-    values = (date, 1, value)
+    values = (date_str, 1, value)
     print(sql, values)
     # cursor.execute(sql)
+
+def date_value_line(line):
+    splitted_line = line.split(',')
+    size_of_line = len(splitted_line)
+    if size_of_line == 2:
+        return splitted_line

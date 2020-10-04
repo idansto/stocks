@@ -6,7 +6,7 @@ def get_max_date_for_metric_id(id):
     sql = 'select max(g.date) from shares.global_data g where g.global_metric_id =%s'
     values = [id]
     cursor.execute(sql, values)
-    date = cursor.fetchone()
+    (date, ) = cursor.fetchone()
     return date
 
 
