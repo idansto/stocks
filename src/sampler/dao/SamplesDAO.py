@@ -24,8 +24,6 @@ def get_samples(company_ids, features_ids, date_list):
         sample_wrapper_list.append(sample_wrapper)
     return sample_wrapper_list
 
-    # return cursor.fetchall()
-
 
 # [1,2] -> "t.feature1, t.feature2"
 def create_small_features_select_list(features_ids):
