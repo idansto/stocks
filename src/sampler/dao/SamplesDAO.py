@@ -49,7 +49,7 @@ def get_samples_with_abs_features(company_ids, date_list, abs_features_ids, feat
 
 def get_samples(company_ids, date_list, features_ids):
     connection, cursor = get_connection_cursor()
-    sql = getSamplesSql(company_ids, date_list, features_ids)
+    sql = get_samples_sql(company_ids, date_list, features_ids)
     cursor.execute(sql)
 
     sample_wrapper_list = []
@@ -111,7 +111,7 @@ def getSamplesSql_with_abs_features(company_ids, date_list, abs_features_ids, fe
     return sql
 
 
-def getSamplesSql(company_ids, date_list, features_ids):
+def get_samples_sql(company_ids, date_list, features_ids):
     small_features = create_small_features_select_list(features_ids)
     dates = create_dates_table(date_list)
     features = create_features_select_list(features_ids)
