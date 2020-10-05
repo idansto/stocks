@@ -29,6 +29,7 @@ class TestYahooFinance(unittest.TestCase):
         data = yf.download("GOOG", start=next_day, end=next_day + datetime.timedelta(days=1), period="1d",
                            interval="1d",
                            rounding=True)
+        print(data)
         self.assertTrue(data['Open'][0], 778.81)
 
 

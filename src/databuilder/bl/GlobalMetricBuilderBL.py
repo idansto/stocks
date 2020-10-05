@@ -66,12 +66,6 @@ def get_date_value_line(line):
     if size_of_line == 2:
         return splitted_line
 
-def test_insert1():
-    (connection, cursor) = get_connection_cursor()
-    sql = "insert into shares.global_data (date, global_metric_id, global_metric_value) values (%s, %s, %s)"
-    values = ['2020-09-27', 2, '0.6600']
-    cursor.execute(sql, values)
-    connection.commit()
 
 ################################################################################################
 

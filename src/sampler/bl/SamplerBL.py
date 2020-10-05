@@ -90,7 +90,7 @@ class Sampler:
         end_date = "2020-3-30"
         date_list = get_quraterly_dates_between(start_date, end_date)
         features_ids = [1, 4, 5, 2, 3, 7]
-        raw_samples = get_samples(companies_ids, features_ids, date_list)
+        raw_samples = get_samples(companies_ids, date_list, features_ids)
 
         for raw_sample in tqdm(raw_samples):
             if self.validate_sample(raw_sample):
