@@ -7,9 +7,8 @@ from sklearn.neighbors import KNeighborsRegressor
 
 
 class StocksLearner:
-    # learner = MLPRegressor(random_state=1, max_iter=10000)
-    learner = KNeighborsRegressor(n_neighbors=2)
-
+    learner = MLPRegressor(random_state=1, max_iter=10000)
+    # learner = KNeighborsRegressor(n_neighbors=2)
     # learner = LinearRegression()
 
     print(f"learner type is: {type(learner)}")

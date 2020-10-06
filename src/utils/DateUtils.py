@@ -12,7 +12,7 @@ def is_date(key):
     # print(key, pattern, result)
     return result
 
-
+@lru_cache(maxsize=1000)
 def str_to_date(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
 
