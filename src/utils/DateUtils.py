@@ -54,9 +54,10 @@ def get_quraterly_dates_between(start_date, end_date):  # TODO
 
     dates_list.append(start_date)
     current_date = start_date
-    next_quarter_date = next_quarter_date_after(current_date)
-    while next_quarter_date <= end_date:
-        dates_list.append(next_quarter_date)
-        next_quarter_date = next_quarter_date_after(next_quarter_date)
+    next_quarter_date_str = next_quarter_date_after(current_date)
+    while next_quarter_date_str <= end_date:
+        # next_quarter_date = str_to_date(next_quarter_date_str)
+        dates_list.append(next_quarter_date_str)
+        next_quarter_date_str = next_quarter_date_after(next_quarter_date_str)
 
     return dates_list

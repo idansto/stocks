@@ -1,11 +1,12 @@
 import yfinance as yf
 import datetime
+
+from sampler.dao.CompaniesDAO import get_tickers, get_companies_ids
 from src.sampler.dao.SamplesDAO import get_samples
 import pandas as pd
 from tqdm import tqdm
 
-from utils import DateUtils
-from utils.DateUtils import get_quraterly_dates_between
+from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
 
 
 class Sampler:
@@ -46,22 +47,28 @@ class Sampler:
         # print(X[12])
         X = []
         y = []
+        companies_tickers = ["AVGO","MSFT"]
+        companies_ids = get_companies_ids(companies_tickers)
         companies_ids = [1, 2, 3, 4, 5, 6, 10]
-        start_date = "2012-09-30"
-        end_date = "2020-3-30"
-        date_list = get_quraterly_dates_between(start_date, end_date)
+        start_date_str = "2014-09-30"
+        end_date_str = "2020-12-31"
+        date_str_list = get_quraterly_dates_between(start_date_str, end_date_str)
         features_ids = [1, 4, 5, 2, 3, 7]
-        raw_samples = get_samples(companies_ids, date_list, features_ids)
+        raw_samples = get_samples(companies_ids, date_str_list, features_ids)
+
+        resonses = get_responses(companies_ids, date_str_list)
 
         for raw_sample in tqdm(raw_samples):
             if self.validate_sample(raw_sample):
-                response = self.get_response(raw_sample.ticker, raw_sample.date)
-                X.append(raw_sample.sample)
-                y.append(response)
+                response = get_response_from_responses(resonses, raw_sample.ticker, raw_sample.date)
+                if response:
+                    # response = self.get_response(raw_sample.ticker, raw_sample.date)
+                    X.append(raw_sample.sample)
+                    y.append(response)
 
         # X_df = pd.DataFrame(X, columns=features_ids, index=cartesian_product_of_dates_and_companies) :TODO add that index
         X_df = pd.DataFrame(X, columns=features_ids)
-        # y_df = pd.DataFrame(y, index=date_list, columns=["Price"]) :TODO add that index
+        # y_df = pd.DataFrame(y, index=date_str_list, columns=["Price"]) :TODO add that index
         y_df = pd.DataFrame(y, columns=["Price"])
         self.print_samples(X_df, y_df)
         return X_df, y_df
@@ -78,15 +85,36 @@ class Sampler:
         date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
         # while date_obj.weekday() > 4:
         #     date_obj += datetime.timedelta(days=1)
-        next_business_day = DateUtils.next_business_day(date_obj)
+        nbd = next_business_day(date_obj)
         # data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1), period="1d",
         #                    interval="1d")
-        data = yf.download(ticker, start=next_business_day, end=next_business_day + datetime.timedelta(days=1))
+        data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
         return float(data["Open"][0])
 
     @staticmethod
     def validate_sample(sample):
         return True
+
+
+def get_responses(companies_ids, date_str_list):
+    responses = {}
+    ticker_list = get_tickers(companies_ids)
+    for date_str in date_str_list:
+        date = str_to_date(date_str)
+        nbd = next_business_day(date)
+        date_str = str(nbd)
+        print(f"is about to download stock info from yahoo for tickers: {ticker_list}, and date: {date_str} ")
+        data = yf.download(ticker_list, start=date_str, end=date_str, period="1d")
+        print(data)
+        responses[date] = data
+    return responses
+
+def get_response_from_responses(resonses, ticker, date):
+    try:
+        return resonses[str_to_date(date)]["Close"][ticker][0]
+    except:
+        print(f"Failed to get response for {ticker} {date}")
+
 
 
 if __name__ == '__main__':

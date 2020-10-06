@@ -2,6 +2,8 @@ import unittest
 import yfinance as yf
 import datetime
 
+from pandas import DataFrame
+
 from utils.DateUtils import str_to_date, next_business_day
 
 
@@ -32,6 +34,54 @@ class TestYahooFinance(unittest.TestCase):
         print(data)
         self.assertTrue(data['Open'][0], 778.81)
 
+    def test_range(self):
+        data_true_true_true_true = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=True, auto_adjust=True, actions=True, progress=True,
+                           interval="1d",
+                           rounding=True)
+        data_false_true_true_true = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=False, auto_adjust=True, actions=True, progress=True,
+                           interval="1d",
+                           rounding=True)
+        data_false_true_false_true = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=False, auto_adjust=True, actions=False, progress=True,
+                           interval="1d",
+                           rounding=True)
+        data_true_true_false_true = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=True, auto_adjust=True, actions=False, progress=True,
+                           interval="1d",
+                           rounding=True)
+        data_false_true_false_false = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=False, auto_adjust=True, actions=False, progress=False,
+                           interval="1d",
+                           rounding=True)
+        data_false_false_false_false = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=False, auto_adjust=False, actions=False, progress=False,
+                           interval="1d",
+                           rounding=True)
+        data_true_false_false_false = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=True, auto_adjust=False, actions=False, progress=False,
+                           interval="1d",
+                           rounding=True)
+        data_true_false_true_false = yf.download("AVGO", start='2019-12-31', end='2020-12-31', period="1d",
+                           back_adjust=True, auto_adjust=False, actions=True, progress=False,
+                           interval="1d",
+                           rounding=True)
+
+        print(data_true_true_true_true)
+        print(data_false_true_true_true)
+        print(data_false_true_false_true)
+        print(data_false_true_false_false)
+        print(data_false_false_false_false)
+        print(data_true_true_false_true)
+        print(data_true_false_false_false)
+        print(data_true_false_true_false)
+
+    def test_ticker_list(self):
+        ticker_list = ["AVGO","MSFT"]
+        data = yf.download(ticker_list, start='2014-09-30', end='2014-09-30', period="1d")
+        print(data)
 
 if __name__ == '__main__':
     unittest.main()
+    DataFrame
