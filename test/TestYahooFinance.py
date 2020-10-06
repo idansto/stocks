@@ -1,3 +1,4 @@
+import math
 import unittest
 import yfinance as yf
 import datetime
@@ -83,6 +84,14 @@ class TestYahooFinance(unittest.TestCase):
         data = yf.download(ticker_list, start='2016-12-29', end='2017-01-05', period="1d")
         data = yf.download(ticker_list, start='2017-01-04', end='2017-01-05', period="1d")
         print(data)
+
+    def test_nan(self):
+        x = float('nan')
+        a = "sdf"
+        y = None
+        print(f"x is nan? {math.isnan(x)}")
+        print(f"a is nan? {math.isnan(a)}")
+        print(f"y is nan? {math.isnan(y)}")
 
 if __name__ == '__main__':
     unittest.main()

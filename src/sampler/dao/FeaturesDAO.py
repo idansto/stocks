@@ -8,7 +8,18 @@ features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3",
                  "Basic Shares Outstanding": "19", "Shares Outstanding": "20", "Basic EPS": "21",
                  "EPS - Earnings Per Share": "22"}
 
+reverse_features_dict = {v: k for k, v in features_dict.items()}
+
+
 def get_feature_id(feature_name):
     return features_dict[feature_name]
+
+def get_feature_name(feature_id):
+    return reverse_features_dict[str(feature_id)]
+
+def get_features_names(feature_ids):
+    result = list(map(get_feature_name, feature_ids))
+    return result
+
 
 

@@ -1,7 +1,10 @@
+import math
+
 import yfinance as yf
 import datetime
 
 from sampler.dao.CompaniesDAO import get_tickers, get_companies_ids
+from sampler.dao.FeaturesDAO import get_features_names
 from src.sampler.dao.SamplesDAO import get_samples
 import pandas as pd
 from tqdm import tqdm
@@ -49,27 +52,30 @@ class Sampler:
         y = []
         companies_tickers = ["AVGO","MSFT"]
         companies_ids = get_companies_ids(companies_tickers)
-        companies_ids = [1, 2, 3, 4, 5, 6, 10]
-        start_date = str_to_date("2020-03-31")
-        end_date = str_to_date("2020-9-30")
+        # companies_ids = [1, 2, 3, 4, 5, 6, 10]
+        start_date = "2019-03-31"
+        end_date = "2020-9-30"
         date_str_list = get_quraterly_dates_between(start_date, end_date)
         features_ids = [1, 4, 5, 2, 3, 7]
         raw_samples = get_samples(companies_ids, date_str_list, features_ids)
 
         resonses = get_responses(companies_ids, date_str_list)
 
+        sample_names = []
         for raw_sample in tqdm(raw_samples):
             if self.validate_sample(raw_sample):
                 response = get_response_from_responses(resonses, raw_sample.ticker, raw_sample.date_obj)
-                if response:
+                if response is not None and not math.isnan(response):
                     # response = self.get_response(raw_sample.ticker, raw_sample.date)
                     X.append(raw_sample.sample)
                     y.append(response)
+                    sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
 
         # X_df = pd.DataFrame(X, columns=features_ids, index=cartesian_product_of_dates_and_companies) :TODO add that index
-        X_df = pd.DataFrame(X, columns=features_ids)
+        features_names = get_features_names(features_ids)
+        X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
         # y_df = pd.DataFrame(y, index=date_str_list, columns=["Price"]) :TODO add that index
-        y_df = pd.DataFrame(y, columns=["Price"])
+        y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
         self.print_samples(X_df, y_df)
         return X_df, y_df
 

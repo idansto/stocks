@@ -23,11 +23,17 @@ class StocksLearner:
         print('\n' + "TEST SAMPLES: ")
         print(X_test.transpose())
         print()
-        print(y_true.transpose())
+        print(y_true.transpose().round(2))
         print()
-        print(y_prediction.transpose())
-        # print(X_test.concat([df.reset_index(drop=1).add_suffix('_1'),
-        #                y_true.reset_index(drop=1).add_suffix('_2')], axis=1).fillna(''))
+        print(y_prediction.transpose().round(2))
+        # y_true.merge(y_prediction, left_index=True, right_index=True)
+
+        print()
+        print('my try')
+        print(df.concat([y_true, y_prediction], axis=1))
+
+        # print(y_true.concat([df.reset_index(drop=1).add_suffix('_1'),
+        #                y_prediction.reset_index(drop=1).add_suffix('_2')], axis=1).fillna(''))
 
     def split_samples(self, X, y):  # TODO: use sklearn split method.
         return X[:len(X) // 2], y[:len(y) // 2], X[len(X) // 2:], y[len(y) // 2:]
