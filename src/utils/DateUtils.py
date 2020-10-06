@@ -1,5 +1,7 @@
 import datetime
 import re
+from functools import lru_cache
+
 import pandas_market_calendars as mcal
 
 date_pattern = re.compile("^\d{4}-\d{1,2}-\d{1,2}$")
@@ -14,7 +16,7 @@ def is_date(key):
 def str_to_date(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
 
-
+@lru_cache(maxsize=1000)
 def next_business_day(date_obj: datetime.date):
     nyse = mcal.get_calendar('NYSE')
     end_date = date_obj + datetime.timedelta(days=5)

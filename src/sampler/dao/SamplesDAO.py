@@ -73,6 +73,7 @@ def create_small_features_select_list(features_ids):
 
 
 def id_to_feature_id(id):
+    # return f"IFNULL(t.feature{id}, 0) as feature{id}"
     return "t.feature{}".format(id)
 
 
@@ -86,14 +87,14 @@ def id_to_key_id(id, key):
 
 
 def getSamplesSql_with_all(company_ids, date_list, global_features_ids, abs_features_ids, features_ids):
+    companies = create_companies(company_ids)
+    dates = create_dates_table(date_list)
     small_global_features = create_small_global_features_select_list(global_features_ids)
     global_features = create_golbal_features_select_list(global_features_ids)
-    small_features = create_small_features_select_list(features_ids)
-    dates = create_dates_table(date_list)
     t_abs_features = create_abs_features(abs_features_ids, 't')
     c_abs_features = create_abs_features(abs_features_ids, 'c')
     features = create_features_select_list(features_ids)
-    companies = create_companies(company_ids)
+    small_features = create_small_features_select_list(features_ids)
     first_feature = id_to_feature_id(features_ids[0])
     sql = f"select t.id, t.ticker, t.date, {small_global_features}, {t_abs_features}, {small_features} from " \
           f"(SELECT c.id, c.ticker, {global_features}, {c_abs_features}, dates.date, {features} from shares.companies c, " \
@@ -123,6 +124,7 @@ def get_samples_sql(company_ids, date_list, features_ids):
     sql = "select t.id, t.ticker, t.date, {} from (SELECT c.id, c.ticker, dates.date, {} from shares.companies c, " \
           "({}) as dates where c.id in ({})) as t where {} is not null;".format(small_features, features, dates,
                                                                                 companies, first_feature)
+    # print(f"sql is: {sql}")
     return sql
 
 
@@ -136,8 +138,9 @@ def create_abs_features(abs_features_ids, char):
     list_of_abs_features = map(functools.partial(create_abs_feature, char=char), abs_features_ids)
     return ',\n'.join(list_of_abs_features)
 
-
+# IFNULL(t.feature2,0) as feature2
 def create_abs_feature(abs_feature_id, char):
+    # return f"IFNULL({char}.{abs_features_map[abs_feature_id]}, 0) as {abs_features_map[abs_feature_id]}"
     return f"{char}.{abs_features_map[abs_feature_id]}"
 
 

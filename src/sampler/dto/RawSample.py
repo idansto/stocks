@@ -13,3 +13,6 @@ class RawSample:
 
     def __repr__(self):
         return self.__str__()
+
+    def getSample(self):
+        return self.sample

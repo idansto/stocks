@@ -14,7 +14,7 @@ def get_tickers(companies_ids):
     connection, cursor = get_connection_cursor()
     comp_name_no_brakets = ", ".join(map(str, companies_ids))
     sql = f"select c.id, c.ticker from shares.companies c where c.id in ({comp_name_no_brakets})"
-    print(f"sql is: {sql}")
+    # print(f"sql is: {sql}")
     cursor.execute(sql)
     db_map = {}
     for key,value in cursor:

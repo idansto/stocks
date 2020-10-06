@@ -1,12 +1,18 @@
 # from sklearn.neural_network import MLPRegressor
 from sklearn.linear_model import LinearRegression
 import pandas as df
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPRegressor
+from sklearn.neighbors import KNeighborsRegressor
 
 
 class StocksLearner:
     # learner = MLPRegressor(random_state=1, max_iter=10000)
+    learner = KNeighborsRegressor(n_neighbors=2)
 
-    learner = LinearRegression()
+    # learner = LinearRegression()
+
+    print(f"learner type is: {type(learner)}")
 
     def fit(self, X_train, y_train):
         self.learner.fit(X_train, y_train)
@@ -36,10 +42,11 @@ class StocksLearner:
         #                y_prediction.reset_index(drop=1).add_suffix('_2')], axis=1).fillna(''))
 
     def split_samples(self, X, y):  # TODO: use sklearn split method.
-        return X[:len(X) // 2], y[:len(y) // 2], X[len(X) // 2:], y[len(y) // 2:]
+        # return X[:len(X) // 2], y[:len(y) // 2], X[len(X) // 2:], y[len(y) // 2:]
+        return train_test_split(X, y, test_size = 0.20, random_state = 42)
 
     def run(self, X, y):
-        X_train, y_train, X_test, y_test = self.split_samples(X, y)
+        X_train, X_test, y_train, y_test = self.split_samples(X, y)
         self.fit(X_train, y_train)
         prediction = self.predict(X_test)
         score = self.score(X_test, y_test)
