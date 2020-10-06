@@ -50,9 +50,9 @@ class Sampler:
         companies_tickers = ["AVGO","MSFT"]
         companies_ids = get_companies_ids(companies_tickers)
         companies_ids = [1, 2, 3, 4, 5, 6, 10]
-        start_date_str = "2014-09-30"
-        end_date_str = "2020-12-31"
-        date_str_list = get_quraterly_dates_between(start_date_str, end_date_str)
+        start_date = str_to_date("2020-03-31")
+        end_date = str_to_date("2020-9-30")
+        date_str_list = get_quraterly_dates_between(start_date, end_date)
         features_ids = [1, 4, 5, 2, 3, 7]
         raw_samples = get_samples(companies_ids, date_str_list, features_ids)
 
@@ -60,7 +60,7 @@ class Sampler:
 
         for raw_sample in tqdm(raw_samples):
             if self.validate_sample(raw_sample):
-                response = get_response_from_responses(resonses, raw_sample.ticker, raw_sample.date)
+                response = get_response_from_responses(resonses, raw_sample.ticker, raw_sample.date_obj)
                 if response:
                     # response = self.get_response(raw_sample.ticker, raw_sample.date)
                     X.append(raw_sample.sample)
@@ -101,19 +101,23 @@ def get_responses(companies_ids, date_str_list):
     ticker_list = get_tickers(companies_ids)
     for date_str in date_str_list:
         date = str_to_date(date_str)
-        nbd = next_business_day(date)
-        date_str = str(nbd)
-        print(f"is about to download stock info from yahoo for tickers: {ticker_list}, and date: {date_str} ")
-        data = yf.download(ticker_list, start=date_str, end=date_str, period="1d")
+        # nbd = next_business_day(date)
+        end_date = date + datetime.timedelta(days=5)
+        end_date_str = str(end_date)
+        # nbd_str = str(nbd)
+        # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
+        print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, looking for range {date_str} -- {end_date_str} ")
+        data = yf.download(ticker_list, start=date_str, end=end_date_str, period="1d")
         print(data)
         responses[date] = data
     return responses
 
-def get_response_from_responses(resonses, ticker, date):
+def get_response_from_responses(resonses, ticker, date_obj: datetime.date):
+    nbd = next_business_day(date_obj)
     try:
-        return resonses[str_to_date(date)]["Close"][ticker][0]
+        return resonses[date_obj]["Close"][ticker][str(nbd)]
     except:
-        print(f"Failed to get response for {ticker} {date}")
+        print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
 
 
 

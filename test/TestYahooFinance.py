@@ -79,7 +79,9 @@ class TestYahooFinance(unittest.TestCase):
 
     def test_ticker_list(self):
         ticker_list = ["AVGO","MSFT"]
-        data = yf.download(ticker_list, start='2014-09-30', end='2014-09-30', period="1d")
+        # ticker_list = ["MSFT"]
+        data = yf.download(ticker_list, start='2016-12-29', end='2017-01-05', period="1d")
+        data = yf.download(ticker_list, start='2017-01-04', end='2017-01-05', period="1d")
         print(data)
 
 if __name__ == '__main__':

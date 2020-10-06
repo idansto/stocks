@@ -15,10 +15,10 @@ def str_to_date(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
 
 
-def next_business_day(date):
+def next_business_day(date_obj: datetime.date):
     nyse = mcal.get_calendar('NYSE')
-    end_date = date + datetime.timedelta(days=5)
-    first_business_date_str = nyse.valid_days(start_date=date, end_date=end_date)[0]
+    end_date = date_obj + datetime.timedelta(days=5)
+    first_business_date_str = nyse.valid_days(start_date=date_obj, end_date=end_date)[0]
     busienss_day = first_business_date_str.to_pydatetime().date()
     return busienss_day
 
@@ -40,7 +40,7 @@ def next_quarter_date_after(date):
         return str(year + 1) + '-03-31'
 
 
-def get_quraterly_dates_between(start_date, end_date):  # TODO
+def get_quraterly_dates_between(start_date_str, end_date_str):  # TODO
 
     # start_year = int(start_date.split(sep='-')[0])
     # start_month = int(start_date.split(sep='-')[1])
@@ -52,12 +52,15 @@ def get_quraterly_dates_between(start_date, end_date):  # TODO
 
     dates_list = []
 
-    dates_list.append(start_date)
-    current_date = start_date
+    dates_list.append(start_date_str)
+    current_date = start_date_str
     next_quarter_date_str = next_quarter_date_after(current_date)
-    while next_quarter_date_str <= end_date:
+    next_quarter_date = str_to_date(next_quarter_date_str)
+    end_date = str_to_date(end_date_str)
+    while next_quarter_date <= end_date:
         # next_quarter_date = str_to_date(next_quarter_date_str)
         dates_list.append(next_quarter_date_str)
         next_quarter_date_str = next_quarter_date_after(next_quarter_date_str)
+        next_quarter_date = str_to_date(next_quarter_date_str)
 
     return dates_list

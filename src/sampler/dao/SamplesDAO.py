@@ -3,6 +3,8 @@ from src.utils.SqlUtils import get_connection_cursor
 from tqdm import tqdm
 import functools
 
+from utils.DateUtils import str_to_date
+
 COMPANY_ID = 0
 TICKER = 1
 DATE = 2
@@ -58,8 +60,9 @@ def get_samples(company_ids, date_list, features_ids):
         company_id = row_list[COMPANY_ID]
         ticker = row_list[TICKER]
         date = row_list[DATE]
+        date_obj = str_to_date(date)
         sample = row_list[SAMPLE_START:]
-        sample_wrapper = RawSample(company_id, ticker, date, sample)
+        sample_wrapper = RawSample(company_id, ticker, date_obj, sample)
         sample_wrapper_list.append(sample_wrapper)
     return sample_wrapper_list
 
