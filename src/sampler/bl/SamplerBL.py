@@ -1,16 +1,14 @@
+import datetime
 import math
 
-import yfinance as yf
-import datetime
-
-from sampler.dao.CompaniesDAO import get_tickers, get_companies_ids
-from sampler.dao.FeaturesDAO import get_features_names
-from src.sampler.dao.SamplesDAO import get_samples
 import pandas as pd
+import yfinance as yf
 from tqdm import tqdm
 
+from sampler.dao.CompaniesDAO import get_tickers
+from sampler.dao.FeaturesDAO import get_features_names
+from src.sampler.dao.SamplesDAO import get_samples
 from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
-from utils.TimerDecorator import timeit
 
 
 def choose_companies():
@@ -44,9 +42,8 @@ def choose_features():
 
 class Sampler:
 
-    @timeit
+    # @timeit
     def build_samples_and_responses(self):
-
         # choose companies, dates and features
         companies_ids, companies_tickers = choose_companies()
         date_str_list = choose_dates()
@@ -58,14 +55,13 @@ class Sampler:
         # get responses
         responses = get_responses(companies_ids, date_str_list)
 
-        # fill X and y
-        X, y, sample_names = self.build_X_and_y(raw_samples, responses)
+        # build X and y
+        X, y, sample_names = build_X_and_y(raw_samples, responses)
 
         # create DataFrame for X and y (samples and results)
-        X_df, y_df = self.build_data_frames(X, features_names, sample_names, y)
+        X_df, y_df = build_data_frames(X, features_names, sample_names, y)
 
         return X_df, y_df
-
 
 
 def is_valid_sample(raw_sample):
@@ -76,7 +72,7 @@ def is_valid_sample(raw_sample):
         return True
 
 
-@timeit
+# @timeit
 def get_responses(companies_ids, date_str_list):
     responses = {}
     ticker_list = get_tickers(companies_ids)
@@ -120,32 +116,31 @@ def print_samples(X_df, y_df):
     print("All Responses: ")
     print(y_df)
 
+def build_data_frames(X, features_names, sample_names, y):
+    X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
+    y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
+    print_samples(X_df, y_df)
+    return X_df, y_df
 
-    def build_data_frames(self, X, features_names, sample_names, y):
-        X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
-        y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
-        print_samples(X_df, y_df)
-        return X_df, y_df
+# @timeit
+def build_X_and_y(raw_samples, responses):
+    X = []
+    y = []
+    sample_names = []
+    for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
+        if is_valid_sample(raw_sample):
+            response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
+            if is_valid_response(response):
+                X.append(raw_sample.sample)
+                y.append(response)
+                sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
 
-    @timeit
-    def build_X_and_y(self, raw_samples, responses):
-        X = []
-        y = []
-        sample_names = []
-        for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
-            if self.is_valid_sample(raw_sample):
-                response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
-                if is_valid_response(response):
-                    X.append(raw_sample.sample)
-                    y.append(response)
-                    sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+    size_of_valid_samples = len(sample_names)
+    size_of_raw_samples = len(raw_samples)
+    print(
+        f"there are {size_of_valid_samples} valid samples, which are %{size_of_valid_samples / size_of_raw_samples} percent of potential samples")
 
-        size_of_valid_samples = len(sample_names)
-        size_of_raw_samples = len(raw_samples)
-        print(
-            f"there are {size_of_valid_samples} valid samples, which are %{size_of_valid_samples / size_of_raw_samples} percent of potential samples")
-
-        return X, y, sample_names
+    return X, y, sample_names
 
 
 if __name__ == '__main__':

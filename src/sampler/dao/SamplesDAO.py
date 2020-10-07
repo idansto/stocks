@@ -49,7 +49,7 @@ def get_samples_with_abs_features(company_ids, date_list, abs_features_ids, feat
         sample_wrapper_list.append(sample_wrapper)
     return sample_wrapper_list
 
-@timeit
+# @timeit
 def get_samples(company_ids, date_list, features_ids):
     connection, cursor = get_connection_cursor()
     sql = get_samples_sql(company_ids, date_list, features_ids)
