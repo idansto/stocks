@@ -81,16 +81,17 @@ def get_responses(companies_ids, date_str_list):
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
         date = str_to_date(date_str)
         missing_tickers = get_missing_tickers(date, ticker_list)
-        # nbd = next_business_day(date)
-        end_date = date + datetime.timedelta(days=4)
-        end_date_str = str(end_date)
-        # nbd_str = str(nbd)
-        # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
-        print(
-            f"is about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} tickers: {missing_tickers},  ")
-        data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
-        print(data)
-        responses[date] = data
+        if len(missing_tickers):
+            # nbd = next_business_day(date)
+            end_date = date + datetime.timedelta(days=4)
+            end_date_str = str(end_date)
+            # nbd_str = str(nbd)
+            # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
+            print(
+                f"is about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} tickers: {missing_tickers},  ")
+            data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
+            print(data)
+            responses[date] = data
     return responses
 
 
@@ -122,9 +123,9 @@ def get_response_from_responses(responses, ticker, date_obj: datetime.date):
 
 def print_samples(X_df, y_df):
     print("All Samples: ")
-    print(X_df.transpose().values.ravel())
+    print(X_df.transpose())
     print("All Responses: ")
-    print(y_df.values.ravel())
+    print(y_df)
 
 
 def build_data_frames(X, features_names, sample_names, y):
