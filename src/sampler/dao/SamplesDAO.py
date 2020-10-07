@@ -4,6 +4,7 @@ from tqdm import tqdm
 import functools
 
 from utils.DateUtils import str_to_date
+from utils.TimerDecorator import timeit
 
 COMPANY_ID = 0
 TICKER = 1
@@ -48,7 +49,7 @@ def get_samples_with_abs_features(company_ids, date_list, abs_features_ids, feat
         sample_wrapper_list.append(sample_wrapper)
     return sample_wrapper_list
 
-
+@timeit
 def get_samples(company_ids, date_list, features_ids):
     connection, cursor = get_connection_cursor()
     sql = get_samples_sql(company_ids, date_list, features_ids)
@@ -64,6 +65,9 @@ def get_samples(company_ids, date_list, features_ids):
         sample = row_list[SAMPLE_START:]
         sample_wrapper = RawSample(company_id, ticker, date_obj, sample)
         sample_wrapper_list.append(sample_wrapper)
+
+    print(f"there are potential {len(sample_wrapper_list)} raw samples")
+
     return sample_wrapper_list
 
 

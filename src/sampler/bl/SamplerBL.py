@@ -13,126 +13,71 @@ from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_
 from utils.TimerDecorator import timeit
 
 
+def choose_companies():
+    companies_ids = range(4, 6)
+    companies_tickers = get_tickers(companies_ids)
+    # companies_tickers = ["AVGO","MSFT"]
+    # companies_ids = get_companies_ids(companies_tickers)
+    # companies_ids = [1, 2, 3, 4, 5, 6, 10]
+    print(f"Chosen {len(companies_tickers)} companies which are: {companies_tickers}")
+    return companies_ids, companies_tickers
+
+
+def choose_dates():
+    start_date = "2019-03-31"
+    end_date = "2020-9-30"
+    date_str_list = get_quraterly_dates_between(start_date, end_date)
+    print(f"Dates are: {len(date_str_list)} dates: ({start_date} -- {end_date})")
+    return date_str_list
+
+
+def choose_features():
+    features_ids = [1, 4, 5, 2, 3, 7]
+    features_ids = [1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 16, 17, 18, 19, 20, 21, 22]
+    # features_ids = [4, 5]
+
+    print(f"{len(features_ids)} features, names are: {get_features_names(features_ids)}\n")
+
+    features_names = get_features_names(features_ids)
+    return features_ids, features_names
+
+
 class Sampler:
-    # sampler_dao = SamplerDao()
-
-    # def get_samples_and_responses_old(self):
-    #     print("builds samples and responses:" + '\n')
-    #     X = []
-    #     y = []
-    #     companies_ids = [2]
-    #     start_date = "2018-12-31"
-    #     end_date = "2019-12-31"
-    #     date_list = get_quraterly_dates_between(start_date, end_date)
-    #     features_ids = [1, 2]
-    #     # raw_samples = self.sampler_dao.get_samples(companies_ids, start_date, end_date, features_ids)
-    #     raw_samples = get_samples(companies_ids, features_ids, date_list)
-    #
-    #     for raw_sample in tqdm(raw_samples):
-    #         # print(raw_sample.date)
-    #         if self.validate_sample(raw_sample):
-    #             response = self.get_response(raw_sample.ticker, raw_sample.date)
-    #             X.append(raw_sample.sample)
-    #             y.append(response)
-    #
-    #     self.print_samples(X, y)
-    #
-    #     return X, y
-
-    def get_samples_and_responses(self):
-        print("builds samples and responses:" + '\n')
-        # features = [12, 13, 14, 15]
-        # dates = ["date1", "date2", "date3"]
-        # X = pd.DataFrame(columns=features, index=dates)
-        # print(X)
-        # X = X.insert(len(X),np.array([1,2,3,4]),True)
-        # print(X)
-        # print(X)
-        # print(X[12])
-        X = []
-        y = []
-        companies_ids = range(1, 100)
-        companies_tickers = get_tickers(companies_ids)
-
-        # companies_tickers = ["AVGO","MSFT"]
-        # companies_ids = get_companies_ids(companies_tickers)
-        # companies_ids = [1, 2, 3, 4, 5, 6, 10]
-
-        start_date = "2010-03-31"
-        end_date = "2020-9-30"
-        date_str_list = get_quraterly_dates_between(start_date, end_date)
-
-        features_ids = [1, 4, 5, 2, 3, 7]
-        features_ids = [1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 16, 17, 18, 19, 20, 21, 22]
-        # features_ids = [4, 5]
-
-        print(f"dates are: {len(date_str_list)} dates: ({start_date}) -- ({end_date})")
-
-        print(f"{len(companies_tickers)} companies which are: {companies_tickers}")
-        print(f"{len(features_ids)} features, names are: {get_features_names(features_ids)}")
-        print()
-
-        raw_samples = get_samples(companies_ids, date_str_list, features_ids)
-        size_of_raw_samples = len(raw_samples)
-        print (f"there are potential {size_of_raw_samples} raw samples")
-
-        resonses = get_responses(companies_ids, date_str_list)
-
-        sample_names = self.create_X_and_y(X, raw_samples, resonses, size_of_raw_samples, y)
-
-        features_names = get_features_names(features_ids)
-        X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
-        y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
-        self.print_samples(X_df, y_df)
-        return X_df, y_df
 
     @timeit
-    def create_X_and_y(self, X, raw_samples, resonses, size_of_raw_samples, y):
-        sample_names = []
-        for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
-            if self.is_valid_sample(raw_sample):
-                response = get_response_from_responses(resonses, raw_sample.ticker, raw_sample.date_obj)
-                if self.is_valid_response(response):
-                    # response = self.get_response(raw_sample.ticker, raw_sample.date)
-                    X.append(raw_sample.sample)
-                    y.append(response)
-                    sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
-        size_of_valid_samples = len(sample_names)
-        print(
-            f"there are {size_of_valid_samples} valid samples, which are %{size_of_valid_samples / size_of_raw_samples} percent of potential samples")
-        return sample_names
+    def build_samples_and_responses(self):
 
-    def print_samples(self, X_df, y_df):
-        print("All Samples: ")
-        print(X_df.transpose())
-        print("All Responses: ")
-        print(y_df)
+        # choose companies, dates and features
+        companies_ids, companies_tickers = choose_companies()
+        date_str_list = choose_dates()
+        features_ids, features_names = choose_features()
 
-    def is_valid_response(self, response):
-        return response is not None and not math.isnan(response)
+        # get samples
+        raw_samples = get_samples(companies_ids, date_str_list, features_ids)
 
-    @staticmethod
-    def get_response(ticker, date):
-        date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
-        # while date_obj.weekday() > 4:
-        #     date_obj += datetime.timedelta(days=1)
-        nbd = next_business_day(date_obj)
-        # data = yf.download(ticker, start=date_obj, end=date_obj + datetime.timedelta(days=1), period="1d",
-        #                    interval="1d")
-        data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
-        return float(data["Open"][0])
+        # get responses
+        responses = get_responses(companies_ids, date_str_list)
 
-    @staticmethod
-    def is_valid_sample(raw_sample):
-        if None in raw_sample.getSample():
-            print(f"bad raw_sample: {raw_sample}")
-            return False
-        else:
-            return True
+        # fill X and y
+        X, y, sample_names = self.build_X_and_y(raw_samples, responses)
+
+        # create DataFrame for X and y (samples and results)
+        X_df, y_df = self.build_data_frames(X, features_names, sample_names, y)
+
+        return X_df, y_df
 
 
+
+def is_valid_sample(raw_sample):
+    if None in raw_sample.getSample():
+        print(f"bad raw_sample: {raw_sample}")
+        return False
+    else:
+        return True
+
+
+@timeit
 def get_responses(companies_ids, date_str_list):
-
     responses = {}
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
@@ -150,14 +95,86 @@ def get_responses(companies_ids, date_str_list):
     return responses
 
 
-def get_response_from_responses(resonses, ticker, date_obj: datetime.date):
+def get_response(ticker, date):
+    date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+    nbd = next_business_day(date_obj)
+    data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
+    return float(data["Open"][0])
+
+
+def is_valid_response(response):
+    return response is not None and not math.isnan(response)
+
+
+def get_response_from_responses(responses, ticker, date_obj: datetime.date):
     nbd = next_business_day(date_obj)
     try:
-        return resonses[date_obj]["Close"][ticker][str(nbd)]
+        return responses[date_obj]["Close"][ticker][str(nbd)]
     except:
         print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
+
+
+def print_samples(X_df, y_df):
+    print("All Samples: ")
+    print(X_df.transpose())
+    print("All Responses: ")
+    print(y_df)
+
+
+    def build_data_frames(self, X, features_names, sample_names, y):
+        X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
+        y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
+        print_samples(X_df, y_df)
+        return X_df, y_df
+
+    @timeit
+    def build_X_and_y(self, raw_samples, responses):
+        X = []
+        y = []
+        sample_names = []
+        for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
+            if self.is_valid_sample(raw_sample):
+                response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
+                if is_valid_response(response):
+                    X.append(raw_sample.sample)
+                    y.append(response)
+                    sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+
+        size_of_valid_samples = len(sample_names)
+        size_of_raw_samples = len(raw_samples)
+        print(
+            f"there are {size_of_valid_samples} valid samples, which are %{size_of_valid_samples / size_of_raw_samples} percent of potential samples")
+
+        return X, y, sample_names
 
 
 if __name__ == '__main__':
     dates_list1 = get_quraterly_dates_between("2018-03-31", "2020-06-30")
     print(dates_list1)
+
+#############################################################################################
+
+# sampler_dao = SamplerDao()
+
+# def get_samples_and_responses_old(self):
+#     print("builds samples and responses:" + '\n')
+#     X = []
+#     y = []
+#     companies_ids = [2]
+#     start_date = "2018-12-31"
+#     end_date = "2019-12-31"
+#     date_list = get_quraterly_dates_between(start_date, end_date)
+#     features_ids = [1, 2]
+#     # raw_samples = self.sampler_dao.get_samples(companies_ids, start_date, end_date, features_ids)
+#     raw_samples = get_samples(companies_ids, features_ids, date_list)
+#
+#     for raw_sample in tqdm(raw_samples):
+#         # print(raw_sample.date)
+#         if self.validate_sample(raw_sample):
+#             response = self.get_response(raw_sample.ticker, raw_sample.date)
+#             X.append(raw_sample.sample)
+#             y.append(response)
+#
+#     self.print_samples(X, y)
+#
+#     return X, y

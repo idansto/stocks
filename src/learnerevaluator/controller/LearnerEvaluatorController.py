@@ -12,7 +12,7 @@ class Controller:
 
     def evaluate_learning_method(self, samples_type, stocks_learner_type):
         sampler = SamplerFactory.get_sampler(samples_type)
-        X, y = sampler.get_samples_and_responses()
+        X, y = sampler.build_samples_and_responses()
 
         stocks_learner = StocksLearnerFactory.get_stocks_learner(stocks_learner_type)
         score = stocks_learner.run(X, y)
