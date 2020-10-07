@@ -10,6 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
+from utils.TimerDecorator import timeit
 
 
 class Sampler:
@@ -65,16 +66,28 @@ class Sampler:
         features_ids = [1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 16, 17, 18, 19, 20, 21, 22]
         # features_ids = [4, 5]
 
-        print(f"dates are: {start_date} -- {end_date}")
-        print(f"companies are: {companies_tickers}")
-        print(f"features names are: {get_features_names(features_ids)}")
+        print(f"dates are: {len(date_str_list)} dates: ({start_date}) -- ({end_date})")
+
+        print(f"{len(companies_tickers)} companies which are: {companies_tickers}")
+        print(f"{len(features_ids)} features, names are: {get_features_names(features_ids)}")
         print()
 
         raw_samples = get_samples(companies_ids, date_str_list, features_ids)
-        print (f"there are {len(raw_samples)} raw samples")
+        size_of_raw_samples = len(raw_samples)
+        print (f"there are potential {size_of_raw_samples} raw samples")
 
         resonses = get_responses(companies_ids, date_str_list)
 
+        sample_names = self.create_X_and_y(X, raw_samples, resonses, size_of_raw_samples, y)
+
+        features_names = get_features_names(features_ids)
+        X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
+        y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
+        self.print_samples(X_df, y_df)
+        return X_df, y_df
+
+    @timeit
+    def create_X_and_y(self, X, raw_samples, resonses, size_of_raw_samples, y):
         sample_names = []
         for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
             if self.is_valid_sample(raw_sample):
@@ -84,19 +97,12 @@ class Sampler:
                     X.append(raw_sample.sample)
                     y.append(response)
                     sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
-
-        print(f"there are {len(sample_names)} valid samples")
-
-        # X_df = pd.DataFrame(X, columns=features_ids, index=cartesian_product_of_dates_and_companies) :TODO add that index
-        features_names = get_features_names(features_ids)
-        X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
-        # y_df = pd.DataFrame(y, index=date_str_list, columns=["Price"]) :TODO add that index
-        y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
-        self.print_samples(X_df, y_df)
-        return X_df, y_df
+        size_of_valid_samples = len(sample_names)
+        print(
+            f"there are {size_of_valid_samples} valid samples, which are %{size_of_valid_samples / size_of_raw_samples} percent of potential samples")
+        return sample_names
 
     def print_samples(self, X_df, y_df):
-
         print("All Samples: ")
         print(X_df.transpose())
         print("All Responses: ")
@@ -126,6 +132,7 @@ class Sampler:
 
 
 def get_responses(companies_ids, date_str_list):
+
     responses = {}
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
@@ -136,7 +143,7 @@ def get_responses(companies_ids, date_str_list):
         # nbd_str = str(nbd)
         # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
         print(
-            f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, looking for range ({date_str} -- {end_date_str}) ")
+            f"is about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Lokking for {len(ticker_list)} tickers: {ticker_list},  ")
         data = yf.download(ticker_list, start=date_str, end=end_date_str, period="1d")
         print(data)
         responses[date] = data
