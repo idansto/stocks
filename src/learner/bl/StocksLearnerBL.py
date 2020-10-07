@@ -4,6 +4,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
 
+from utils.TimerDecorator import timeit
+
 
 class StocksLearner:
     learner = MLPRegressor(random_state=1, max_iter=10000)
@@ -46,11 +48,11 @@ class StocksLearner:
         # return train_test_split(X, y, test_size = 0.20, random_state = 42)
         return train_test_split(X, y, test_size=0.20, shuffle=False)
 
-    # @timeit(message="The learning phase")
+    @timeit(message="The learning phase")
     def run(self, X, y):
         X_train, X_test, y_train, y_test = self.split_samples(X, y)
         print("1111111111111111111")
-        self.fit(X_train, y_train.values)
+        self.fit(X_train, y_train.values.ravel())
         print("2222222222222222222")
         y_prediction = self.predict(X_test)
         print("3333333333333333333")

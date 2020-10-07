@@ -7,8 +7,10 @@ from tqdm import tqdm
 
 from sampler.dao.CompaniesDAO import get_tickers
 from sampler.dao.FeaturesDAO import get_features_names
+from sampler.dao.TickersPricesDAO import get_closing_price, insert_closing_price, get_missing_tickers
 from src.sampler.dao.SamplesDAO import get_samples
 from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
+from utils.TimerDecorator import timeit
 
 
 def choose_companies():
@@ -42,7 +44,7 @@ def choose_features():
 
 class Sampler:
 
-    # @timeit
+    @timeit(message=None)
     def build_samples_and_responses(self):
         # choose companies, dates and features
         companies_ids, companies_tickers = choose_companies()
@@ -72,30 +74,31 @@ def is_valid_sample(raw_sample):
         return True
 
 
-# @timeit
+@timeit(message=None)
 def get_responses(companies_ids, date_str_list):
     responses = {}
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
         date = str_to_date(date_str)
+        missing_tickers = get_missing_tickers(date, ticker_list)
         # nbd = next_business_day(date)
         end_date = date + datetime.timedelta(days=4)
         end_date_str = str(end_date)
         # nbd_str = str(nbd)
         # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
         print(
-            f"is about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Lokking for {len(ticker_list)} tickers: {ticker_list},  ")
-        data = yf.download(ticker_list, start=date_str, end=end_date_str, period="1d")
+            f"is about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} tickers: {missing_tickers},  ")
+        data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
         print(data)
         responses[date] = data
     return responses
 
 
-def get_response(ticker, date):
-    date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
-    nbd = next_business_day(date_obj)
-    data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
-    return float(data["Open"][0])
+# def get_response(ticker, date):
+#     date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+#     nbd = next_business_day(date_obj)
+#     data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
+#     return float(data["Open"][0])
 
 
 def is_valid_response(response):
@@ -105,16 +108,24 @@ def is_valid_response(response):
 def get_response_from_responses(responses, ticker, date_obj: datetime.date):
     nbd = next_business_day(date_obj)
     try:
-        return responses[date_obj]["Close"][ticker][str(nbd)]
+        # try to get from responses (yahoo)
+        closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
+        insert_closing_price(ticker, date_obj, closing_price)
     except:
-        print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
+        # try to get from DB
+        closing_price = get_closing_price(date_obj, ticker)
+        if not closing_price:
+            print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
+
+    return closing_price
 
 
 def print_samples(X_df, y_df):
     print("All Samples: ")
-    print(X_df.transpose())
+    print(X_df.transpose().values.ravel())
     print("All Responses: ")
-    print(y_df)
+    print(y_df.values.ravel())
+
 
 def build_data_frames(X, features_names, sample_names, y):
     X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
@@ -122,7 +133,8 @@ def build_data_frames(X, features_names, sample_names, y):
     print_samples(X_df, y_df)
     return X_df, y_df
 
-# @timeit
+
+@timeit(message=None)
 def build_X_and_y(raw_samples, responses):
     X = []
     y = []
