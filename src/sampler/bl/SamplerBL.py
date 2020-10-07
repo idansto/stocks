@@ -14,51 +14,20 @@ from utils.TimerDecorator import timeit
 
 
 class Sampler:
-    # sampler_dao = SamplerDao()
-
-    # def get_samples_and_responses_old(self):
-    #     print("builds samples and responses:" + '\n')
-    #     X = []
-    #     y = []
-    #     companies_ids = [2]
-    #     start_date = "2018-12-31"
-    #     end_date = "2019-12-31"
-    #     date_list = get_quraterly_dates_between(start_date, end_date)
-    #     features_ids = [1, 2]
-    #     # raw_samples = self.sampler_dao.get_samples(companies_ids, start_date, end_date, features_ids)
-    #     raw_samples = get_samples(companies_ids, features_ids, date_list)
-    #
-    #     for raw_sample in tqdm(raw_samples):
-    #         # print(raw_sample.date)
-    #         if self.validate_sample(raw_sample):
-    #             response = self.get_response(raw_sample.ticker, raw_sample.date)
-    #             X.append(raw_sample.sample)
-    #             y.append(response)
-    #
-    #     self.print_samples(X, y)
-    #
-    #     return X, y
 
     def get_samples_and_responses(self):
         print("builds samples and responses:" + '\n')
-        # features = [12, 13, 14, 15]
-        # dates = ["date1", "date2", "date3"]
-        # X = pd.DataFrame(columns=features, index=dates)
-        # print(X)
-        # X = X.insert(len(X),np.array([1,2,3,4]),True)
-        # print(X)
-        # print(X)
-        # print(X[12])
+
         X = []
         y = []
-        companies_ids = range(1, 100)
+        companies_ids = range(1, 21)
         companies_tickers = get_tickers(companies_ids)
 
         # companies_tickers = ["AVGO","MSFT"]
         # companies_ids = get_companies_ids(companies_tickers)
         # companies_ids = [1, 2, 3, 4, 5, 6, 10]
 
-        start_date = "2010-03-31"
+        start_date = "2015-03-31"
         end_date = "2020-9-30"
         date_str_list = get_quraterly_dates_between(start_date, end_date)
 
@@ -74,7 +43,7 @@ class Sampler:
 
         raw_samples = get_samples(companies_ids, date_str_list, features_ids)
         size_of_raw_samples = len(raw_samples)
-        print (f"there are potential {size_of_raw_samples} raw samples")
+        print(f"there are potential {size_of_raw_samples} raw samples")
 
         resonses = get_responses(companies_ids, date_str_list)
 
@@ -86,12 +55,12 @@ class Sampler:
         self.print_samples(X_df, y_df)
         return X_df, y_df
 
-    @timeit
-    def create_X_and_y(self, X, raw_samples, resonses, size_of_raw_samples, y):
+    # @timeit
+    def create_X_and_y(self, X, raw_samples, responses, size_of_raw_samples, y):
         sample_names = []
         for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
             if self.is_valid_sample(raw_sample):
-                response = get_response_from_responses(resonses, raw_sample.ticker, raw_sample.date_obj)
+                response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
                 if self.is_valid_response(response):
                     # response = self.get_response(raw_sample.ticker, raw_sample.date)
                     X.append(raw_sample.sample)
@@ -132,7 +101,6 @@ class Sampler:
 
 
 def get_responses(companies_ids, date_str_list):
-
     responses = {}
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):

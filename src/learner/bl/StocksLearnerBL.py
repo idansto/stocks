@@ -4,12 +4,13 @@ import pandas as df
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
+import numpy as np
 
 
 class StocksLearner:
-    learner = MLPRegressor(random_state=1, max_iter=10000)
-    # learner = KNeighborsRegressor(n_neighbors=2)
-    # learner = LinearRegression()
+    learner = MLPRegressor(random_state=1, max_iter=10000)  # 825
+    # learner = KNeighborsRegressor(n_neighbors=15) #807
+    # learner = LinearRegression()  # 1092
 
     print(f"learner type is: {type(learner)}")
 
@@ -19,11 +20,18 @@ class StocksLearner:
     def predict(self, X):
         return df.DataFrame(self.learner.predict(X), columns=["Predicted Price"], index=X.index)
 
-    def score(self, X_test, y_test):
+    def official_learner_score(self, X_test, y_test):
         return self.learner.score(X_test, y_test)
 
-    def print_result_table(self, ids_list, X_test, y_true, y_prediction):
-        result = [ids_list, y_true, y_prediction]
+    def relative_score(self, y_true, y_prediction):
+        ratios = np.array(y_prediction) / np.array(y_true)
+        print(ratios)
+        ones = np.ones(len(y_true))
+        print(ones)
+        result = np.absolute(ratios - ones)
+        return result.sum()
+
+    def print_result_table(self, X_test, y_true, y_prediction):
         print('\n' + "result table: ")
         print('\n' + "TEST SAMPLES: ")
         print(X_test.transpose())
@@ -37,23 +45,24 @@ class StocksLearner:
         print('my try')
         print(df.concat([y_true, y_prediction], axis=1))
 
-        # print(y_true.concat([df.reset_index(drop=1).add_suffix('_1'),
-        #                y_prediction.reset_index(drop=1).add_suffix('_2')], axis=1).fillna(''))
-
-    def split_samples(self, X, y):  # TODO: use sklearn split method.
+    def split_samples(self, X, y):
         # return X[:len(X) // 2], y[:len(y) // 2], X[len(X) // 2:], y[len(y) // 2:]
-        return train_test_split(X, y, test_size = 0.20, random_state = 42)
+        return train_test_split(X, y, test_size=0.20, random_state=42)
 
     def run(self, X, y):
         X_train, X_test, y_train, y_test = self.split_samples(X, y)
         self.fit(X_train, y_train)
-        prediction = self.predict(X_test)
-        score = self.score(X_test, y_test)
-        samples_ids_list = range(len(y_test))
-        self.print_result_table(samples_ids_list, X_test, y_test, prediction)
-        print('\n' + "score -->  ", score)
-        return score
+        y_prediction = self.predict(X_test)
+        official_learner_score = self.official_learner_score(X_test, y_test)
+        relative_score = self.relative_score(y_test, y_prediction)
+        self.print_result_table(X_test, y_test, y_prediction)
+        print('\n' + "Official learner score -->  ", official_learner_score)
+        print('\n' + "Relative score -->  ", relative_score)
+        return official_learner_score, relative_score
 
 
 if __name__ == '__main__':
-    pass
+    learner = StocksLearner()
+    learner.run([[1, 2, 3], [4, 5, 6], [1, 2, 3], [4, 5, 6], [1, 2, 3], [4, 5, 6]], [10, 20, 13, 14, 1511, 56])
+    # score = learner.score([15, 10], [10, 10])
+    # print(score)
