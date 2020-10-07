@@ -32,15 +32,13 @@ def next_quarter_date_after(date):
     day = int(date_components_list[2])
 
     if month == 3:
-        # return str(year) + '-06-30'
         return f"{year}-06-30"
     if month == 6:
-        return str(year) + '-09-30'
+        return f"{year}-09-30"
     if month == 9:
-        return str(year) + '-12-31'
+        return f"{year}-12-31"
     if month == 12:
-        return str(year + 1) + '-03-31'
-
+        return f"{year+1}-03-31"
 
 def get_quraterly_dates_between(start_date_str, end_date_str):  # TODO
 
