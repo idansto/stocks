@@ -53,13 +53,13 @@ class Sampler:
 
         # get samples
         raw_samples = get_samples(companies_ids, date_str_list, features_ids)
-        valid_raw_samples = [raw_sample for raw_sample in raw_samples if is_valid_sample(raw_sample)]
+        # valid_raw_samples = [raw_sample for raw_sample in raw_samples if is_valid_sample(raw_sample)]
 
         # get responses
         responses = get_responses(companies_ids, date_str_list)
 
         # build X and y
-        X, y, sample_names = build_X_and_y(valid_raw_samples, responses)
+        X, y, sample_names = build_X_and_y(raw_samples, responses)
 
         # create DataFrame for X and y (samples and results)
         X_df, y_df = build_data_frames(X, features_names, sample_names, y)
@@ -79,7 +79,7 @@ def is_valid_sample(raw_sample):
 
 @timeit(message=None)
 def get_responses(companies_ids, date_str_list):
-    responses = {}
+    date_ticker_to_closing_price_map = {}
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
         date = str_to_date(date_str)
@@ -90,9 +90,11 @@ def get_responses(companies_ids, date_str_list):
             print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} missing tickers: {missing_tickers},  ')
             data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
             print(data)
-            insert_data_into_db(data, missing_tickers)
-            responses[date] = data
-    return responses
+            single_date_map = insert_data_into_db(data, missing_tickers, date)
+            # responses[date] = data
+        date_ticker_to_closing_price_map = {**date_ticker_to_closing_price_map, **single_date_map}
+    return date_ticker_to_closing_price_map
+
 
 def insert_data_into_db(data, missing_tickers, date):
     date_ticker_to_closing_price_map = {}
@@ -101,6 +103,7 @@ def insert_data_into_db(data, missing_tickers, date):
         closing_price = data["Close"][ticker][str(nbd)]
         insert_closing_price(ticker, date, closing_price)
         date_ticker_to_closing_price_map[f"{date}.{ticker}"] = closing_price
+
     return date_ticker_to_closing_price_map
 
 
@@ -109,18 +112,20 @@ def is_valid_response(response):
 
 
 def get_response_from_responses(responses, ticker, date_obj: datetime.date):
-    nbd = next_business_day(date_obj)
-    try:
-        # try to get from responses (yahoo)
-        closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
-        insert_closing_price(ticker, date_obj, closing_price)
-    except:
-        # try to get from DB
-        closing_price = get_closing_price(date_obj, ticker)
-        if not closing_price:
-            print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
-
-    return closing_price
+    key = f"{date_obj}.{ticker}"
+    return responses[key]
+    # nbd = next_business_day(date_obj)
+    # try:
+    #     # try to get from responses (yahoo)
+    #     closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
+    #     insert_closing_price(ticker, date_obj, closing_price)
+    # except:
+    #     # try to get from DB
+    #     closing_price = get_closing_price(date_obj, ticker)
+    #     if not closing_price:
+    #         print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
+    #
+    # return closing_price
 
 
 def print_samples(X_df, y_df):
@@ -144,12 +149,12 @@ def build_X_and_y(valid_raw_samples, responses):
     y = []
     sample_names = []
     for raw_sample in tqdm(valid_raw_samples, desc='creating X and y from raw samples'):
-        # if is_valid_sample(raw_sample):
-        response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
-        if is_valid_response(response):
-            X.append(raw_sample.sample)
-            y.append(response)
-            sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+        if is_valid_sample(raw_sample):
+            response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
+            if is_valid_response(response):
+                X.append(raw_sample.sample)
+                y.append(response)
+                sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
 
     size_of_valid_samples = len(sample_names)
     size_of_raw_samples = len(valid_raw_samples)
