@@ -100,7 +100,9 @@ def insert_data_into_db(data, missing_tickers, date):
     for ticker in missing_tickers:
         closing_price = data["Close"][ticker][str(nbd)]
         insert_closing_price(ticker, date, closing_price)
-        date_ticker_map
+        date_ticker_to_closing_price_map[f"{date}.{ticker}"] = closing_price
+    return date_ticker_to_closing_price_map
+
 
 def is_valid_response(response):
     return response is not None and not math.isnan(response)
