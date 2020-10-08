@@ -24,8 +24,8 @@ def choose_companies():
 
 
 def choose_dates():
-    start_date = "2019-03-31"
-    end_date = "2020-9-30"
+    start_date = "2019-09-30"
+    end_date = "2019-09-30"
     date_str_list = get_quraterly_dates_between(start_date, end_date)
     print(f"Dates are: {len(date_str_list)} dates: ({start_date} -- {end_date})")
     return date_str_list
@@ -53,12 +53,13 @@ class Sampler:
 
         # get samples
         raw_samples = get_samples(companies_ids, date_str_list, features_ids)
+        valid_raw_samples = [raw_sample for raw_sample in raw_samples if is_valid_sample(raw_sample)]
 
         # get responses
         responses = get_responses(companies_ids, date_str_list)
 
         # build X and y
-        X, y, sample_names = build_X_and_y(raw_samples, responses)
+        X, y, sample_names = build_X_and_y(valid_raw_samples, responses)
 
         # create DataFrame for X and y (samples and results)
         X_df, y_df = build_data_frames(X, features_names, sample_names, y)
@@ -74,6 +75,8 @@ def is_valid_sample(raw_sample):
         return True
 
 
+
+
 @timeit(message=None)
 def get_responses(companies_ids, date_str_list):
     responses = {}
@@ -82,24 +85,22 @@ def get_responses(companies_ids, date_str_list):
         date = str_to_date(date_str)
         missing_tickers = get_missing_tickers(date, ticker_list)
         if len(missing_tickers):
-            # nbd = next_business_day(date)
             end_date = date + datetime.timedelta(days=4)
             end_date_str = str(end_date)
-            # nbd_str = str(nbd)
-            # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
             print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} missing tickers: {missing_tickers},  ')
             data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
             print(data)
+            insert_data_into_db(data, missing_tickers)
             responses[date] = data
     return responses
 
-
-# def get_response(ticker, date):
-#     date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
-#     nbd = next_business_day(date_obj)
-#     data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
-#     return float(data["Open"][0])
-
+def insert_data_into_db(data, missing_tickers, date):
+    date_ticker_to_closing_price_map = {}
+    nbd = next_business_day(date)
+    for ticker in missing_tickers:
+        closing_price = data["Close"][ticker][str(nbd)]
+        insert_closing_price(ticker, date, closing_price)
+        date_ticker_map
 
 def is_valid_response(response):
     return response is not None and not math.isnan(response)
@@ -136,20 +137,20 @@ def build_data_frames(X, features_names, sample_names, y):
 
 
 @timeit(message=None)
-def build_X_and_y(raw_samples, responses):
+def build_X_and_y(valid_raw_samples, responses):
     X = []
     y = []
     sample_names = []
-    for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
-        if is_valid_sample(raw_sample):
-            response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
-            if is_valid_response(response):
-                X.append(raw_sample.sample)
-                y.append(response)
-                sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+    for raw_sample in tqdm(valid_raw_samples, desc='creating X and y from raw samples'):
+        # if is_valid_sample(raw_sample):
+        response = get_response_from_responses(responses, raw_sample.ticker, raw_sample.date_obj)
+        if is_valid_response(response):
+            X.append(raw_sample.sample)
+            y.append(response)
+            sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
 
     size_of_valid_samples = len(sample_names)
-    size_of_raw_samples = len(raw_samples)
+    size_of_raw_samples = len(valid_raw_samples)
     print(
         f"there are {size_of_valid_samples} valid samples, which are %{size_of_valid_samples / size_of_raw_samples} percent of potential samples")
 
@@ -186,3 +187,11 @@ if __name__ == '__main__':
 #     self.print_samples(X, y)
 #
 #     return X, y
+
+
+# def get_response(ticker, date):
+#     date_obj = datetime.datetime.strptime(date, '%Y-%m-%d')
+#     nbd = next_business_day(date_obj)
+#     data = yf.download(ticker, start=nbd, end=nbd + datetime.timedelta(days=1))
+#     return float(data["Open"][0])
+
