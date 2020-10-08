@@ -121,20 +121,19 @@ def is_valid_response(response):
 
 
 def get_response_from_responses(responses, ticker, date_obj: datetime.date):
-    key = f"{date_obj}.{ticker}"
-    return responses[key]
-    # nbd = next_business_day(date_obj)
-    # try:
-    #     # try to get from responses (yahoo)
-    #     closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
-    #     insert_closing_price(ticker, date_obj, closing_price)
-    # except:
-    #     # try to get from DB
-    #     closing_price = get_closing_price(date_obj, ticker)
-    #     if not closing_price:
-    #         print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
-    #
-    # return closing_price
+    nbd = next_business_day(date_obj)
+    try:
+        # try to get from responses (yahoo)
+        # closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
+        return responses[f"{date_obj}.{ticker}"]
+        # insert_closing_price(ticker, date_obj, closing_price)
+    except:
+        # try to get from DB
+        closing_price = get_closing_price(date_obj, ticker)
+        if not closing_price:
+            print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
+
+    return closing_price
 
 
 def print_samples(X_df, y_df):
