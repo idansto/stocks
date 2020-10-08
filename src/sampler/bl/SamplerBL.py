@@ -108,10 +108,16 @@ def get_responses(companies_ids, date_str_list):
 def insert_data_into_db(data, missing_tickers, date):
     date_ticker_to_closing_price_map = {}
     nbd = next_business_day(date)
-    for ticker in missing_tickers:
-        closing_price = data["Close"][ticker][str(nbd)]
+    if len(missing_tickers) == 1:
+        ticker = missing_tickers[0]
+        closing_price = data["Close"][str(nbd)]
         insert_closing_price(ticker, date, closing_price)
         date_ticker_to_closing_price_map[f"{date}.{ticker}"] = closing_price
+    else:
+        for ticker in missing_tickers:
+            closing_price = data["Close"][ticker][str(nbd)]
+            insert_closing_price(ticker, date, closing_price)
+            date_ticker_to_closing_price_map[f"{date}.{ticker}"] = closing_price
 
     return date_ticker_to_closing_price_map
 
@@ -121,7 +127,7 @@ def is_valid_response(response):
 
 
 def get_response_from_responses(responses, ticker, date_obj: datetime.date):
-    nbd = next_business_day(date_obj)
+    # nbd = next_business_day(date_obj)
     try:
         # try to get from responses (yahoo)
         # closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
@@ -131,7 +137,7 @@ def get_response_from_responses(responses, ticker, date_obj: datetime.date):
         # try to get from DB
         closing_price = get_closing_price(date_obj, ticker)
         if not closing_price:
-            print(f"Failed to get response for {ticker} {date_obj} looking for {nbd}")
+            print(f"Failed to get response for {ticker} {date_obj}")
 
     return closing_price
 
