@@ -90,9 +90,6 @@ def get_responses(companies_ids, date_str_list):
         sizeof_missing_tickers = len(missing_tickers)
 
         if sizeof_missing_tickers:
-            if sizeof_missing_tickers == 1:
-                missing_tickers.append("")
-
             end_date = date + datetime.timedelta(days=4)
             end_date_str = str(end_date)
             print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {sizeof_missing_tickers} missing tickers: {missing_tickers},  ')
