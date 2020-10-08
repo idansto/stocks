@@ -79,20 +79,29 @@ def is_valid_sample(raw_sample):
 
 @timeit(message=None)
 def get_responses(companies_ids, date_str_list):
+
     date_ticker_to_closing_price_map = {}
+
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
+
         date = str_to_date(date_str)
         missing_tickers = get_missing_tickers(date, ticker_list)
-        if len(missing_tickers):
+        sizeof_missing_tickers = len(missing_tickers)
+
+        if sizeof_missing_tickers:
+            if sizeof_missing_tickers == 1:
+                missing_tickers.append("")
+
             end_date = date + datetime.timedelta(days=4)
             end_date_str = str(end_date)
-            print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} missing tickers: {missing_tickers},  ')
+            print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {sizeof_missing_tickers} missing tickers: {missing_tickers},  ')
             data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
             print(data)
             single_date_map = insert_data_into_db(data, missing_tickers, date)
             # responses[date] = data
-        date_ticker_to_closing_price_map = {**date_ticker_to_closing_price_map, **single_date_map}
+            date_ticker_to_closing_price_map = {**date_ticker_to_closing_price_map, **single_date_map}
+
     return date_ticker_to_closing_price_map
 
 

@@ -94,8 +94,8 @@ class TestYahooFinance(unittest.TestCase):
         print(f"y is nan? {math.isnan(y)}")
 
     def testdownload(self):
-        data = yf.download(["FB","MSFT"], start='2019-09-30', end='2019-09-30', period="1d")
-        data1 = yf.download(["FB","MSFT"], start='2019-09-30', end='2019-09-30', period="1d")
+        data = yf.download(["FB","MSFT"], start='2019-09-30', end='2019-10-04', period="1d", )
+        data1 = yf.download(["MSFT", ""], start='2019-09-30', end='2019-10-04', period="1d")
         pass
 
 if __name__ == '__main__':
