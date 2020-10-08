@@ -1,2 +1,24 @@
-get next business day
-how to go back to previous editor position - conr+alt+left
+
+Builders
+    add more info to DB, such as Key Financial Ratios
+
+prints
+    add colors to message... (times in different color)
+    1 format numbers two decimal digits (for instance at relative_score and score)
+    1 comment out tested sql prints
+    1 comment out TEST RESULTS (y_test) & TEST RESULT PREDCTION (y_prediction) as ACTUAL Vs PREDICTION (y_test vs y_prediction) has them both
+    print with flush to help debug
+
+add sanity
+
+collecting data
+    remove features that are not always there - based on statistics...
+    optimize calls to yahoo, try exact date and use range only if not found - read about it...
+
+call learner with all possible features: (global, abs ticker features, date-based-ticker-features)
+find and use same names
+
+clean code
+    refactor methods
+    use better names
+    add documentation

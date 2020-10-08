@@ -87,8 +87,7 @@ def get_responses(companies_ids, date_str_list):
             end_date_str = str(end_date)
             # nbd_str = str(nbd)
             # print(f"is about to download stock info from yahoo for tickers: {ticker_list}, original date: {date_str}, business date: {nbd_str}, looking for range {date_str}-{end_date_str} ")
-            print(
-                f"is about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} tickers: {missing_tickers},  ")
+            print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {len(missing_tickers)} missing tickers: {missing_tickers},  ')
             data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
             print(data)
             responses[date] = data
@@ -129,6 +128,7 @@ def print_samples(X_df, y_df):
 
 
 def build_data_frames(X, features_names, sample_names, y):
+    pd.options.display.float_format = '${:,.2f}'.format
     X_df = pd.DataFrame(X, columns=features_names, index=sample_names)
     y_df = pd.DataFrame(y, columns=["Price          "], index=sample_names)
     print_samples(X_df, y_df)

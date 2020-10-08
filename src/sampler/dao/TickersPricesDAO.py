@@ -4,7 +4,7 @@ from utils.SqlUtils import get_connection_cursor
 def get_closing_price(date, ticker):
     connection, cursor = get_connection_cursor()
     sql = f"select t.closing_price from shares.tickers_prices t where t.date = '{date}' and t.ticker = '{ticker}'"
-    print(f"sql is: {sql}")
+    # print(f"sql is: {sql}")
     cursor.execute(sql)
     (closing_price,) = cursor.fetchone()
     return closing_price
@@ -13,7 +13,7 @@ def get_closing_price(date, ticker):
 def insert_closing_price(ticker, date_obj, closing_price):
     connection, cursor = get_connection_cursor()
     sql = f"INSERT INTO shares.tickers_prices (date, ticker, closing_price) VALUES ('{date_obj}', '{ticker}', {closing_price})"
-    print(f"sql is: {sql}")
+    # print(f"sql is: {sql}")
     cursor.execute(sql)
     connection.commit()
 
@@ -23,7 +23,7 @@ def get_missing_tickers(date, ticker_list):
     ticker_list_table_sql = create_ticker_list_table_sql(ticker_list)
     sql = f"select tickers.ticker from ({ticker_list_table_sql}) as tickers where tickers.ticker not in (select " \
           f"t.ticker from shares.tickers_prices t where t.date = '{date}')"
-    print(f"sql is: {sql}")
+    # print(f"sql is: {sql}")
     cursor.execute(sql)
     tuples = cursor.fetchall()
     return [i[0] for i in tuples]

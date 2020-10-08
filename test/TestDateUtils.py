@@ -2,6 +2,7 @@ import datetime
 import unittest
 from datetime import timedelta
 
+from utils.Colors import bcolors
 from utils.DateUtils import next_business_day, str_to_date, get_quraterly_dates_between
 
 
@@ -23,3 +24,7 @@ class TestDateUtils(unittest.TestCase):
         date = str_to_date('2020-03-31')
         next_date = date + datetime.timedelta(days=91)
         print(f"next date = {next_date}")
+
+    def test_color_printing(self):
+        print(f"{bcolors.OKBLUE}Warning: No active frommets remain. Continue?{bcolors.ENDC}")
+
