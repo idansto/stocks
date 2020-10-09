@@ -67,7 +67,6 @@ def get_samples(company_ids, date_list, features_ids):
         sample_wrapper_list.append(sample_wrapper)
 
     print(f"there are potential {len(sample_wrapper_list)} raw samples")
-
     return sample_wrapper_list
 
 
