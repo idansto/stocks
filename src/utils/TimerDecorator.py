@@ -11,7 +11,7 @@ def timeit(message):
             te = time.time()
             ajusted_message = message if message else function.__name__
             elapsed_time = te - ts
-            print(f"{color.BLUE}{ajusted_message} took: {elapsed_time:.2f} Sec{color.END}")
+            print(f"{color.BLUE}\n{ajusted_message} took: {elapsed_time:.2f} Sec{color.END}")
 
             return result
 

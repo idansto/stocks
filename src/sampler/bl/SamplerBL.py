@@ -158,7 +158,8 @@ def insert_data_into_db(single_date_map):
 
 
 def is_valid_response(response):
-    return response is not None and not math.isnan(response) and not response<0
+    return response > 0
+    # return response is not None and not math.isnan(response) and not response<0
 
 
 def get_response_from_yahoo_or_db(yahoo_responses, ticker, date_obj: datetime.date):

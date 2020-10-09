@@ -77,16 +77,18 @@ def extractOriginalData(text: object) -> object:
     else:
         print('not found')
         return None
-    #
-    # try:
-    #     found = re.search('var originalData = (.+);\s+var source =', text).group(1)
-    # except AttributeError:
-    #     found = ''
-    # print(f'json =  {found}')
-    # return found
 
 
 #################################################################################################
+
+#
+# try:
+#     found = re.search('var originalData = (.+);\s+var source =', text).group(1)
+# except AttributeError:
+#     found = ''
+# print(f'json =  {found}')
+# return found
+
 
 def getCompanyNameFromJsonFileTRY(tickerName):
     file = open('resources/tickersInfo.json', 'r')
