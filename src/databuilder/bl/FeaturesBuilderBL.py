@@ -16,6 +16,19 @@ def fillDBFeatures():
     connection.commit()
 
 
+def fill_db_features_financial_ratios():
+    data = getJsonFromFile('../../../resources/financial-ratios.json')
+    connection, cursor = get_connection_cursor()
+    for dic in data:
+        link = dic['field_name']
+        featureName = extractFeautreName(link)
+        sql = "INSERT INTO shares.features (name) VALUES (%s)"
+        val = [featureName]
+        cursor.execute(sql, val)
+        print(featureName)
+    connection.commit()
+
+
 # features_dict = {'revenue': '1', 'sales': '2'}
 def print_feature_dict():
     connection, cursor = get_connection_cursor()
@@ -25,6 +38,10 @@ def print_feature_dict():
     for (id, name) in cursor:
         print('"', name, '": ', '"', id, '", ', sep='', end='')
     print("}")
+
+if __name__ == '__main__':
+    print_feature_dict()
+
 
 ##################################################################################################
 

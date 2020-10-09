@@ -3,7 +3,8 @@ from utils.SqlUtils import get_connection_cursor
 
 def company_iterator():
     connection, cursor = get_connection_cursor()
-    sql = "select c.id, c.ticker, c.comp_name from shares.companies c where c.ticker >= 'CLUB'"
+    sql = "select c.id, c.ticker, c.comp_name from shares.companies c where c.ticker = 'AMZN'"
+    sql = "select c.id, c.ticker, c.comp_name from shares.companies"
     cursor.execute(sql)
     return cursor.fetchall()
     # print('cursor = ',cursor)

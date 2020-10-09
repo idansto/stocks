@@ -24,11 +24,13 @@ def extractFeautreName(link):
         found = found.group(1)
     return found
 
+# https://www.macrotrends.net/stocks/charts/AMZN/amazon/financial-ratios?freq=Q
 
-def populate_db_financial_statements():
+def populate_db_financial_statements_financial_ratios():
+    url_pattern = "https://www.macrotrends.net/stocks/charts/{}/{}/financial-ratios?freq=Q"
     connection, cursor = get_connection_cursor()
     for (company_id, ticker, company_name) in tqdm(company_iterator()):
-        json: Optional[Any] = getJsonFromMacrotrends(ticker, company_name)
+        json: Optional[Any] = get_json_from_macrotrends(url_pattern, ticker, company_name)
         if (json):
             for dic in json:
                 link = dic['field_name']
@@ -39,35 +41,58 @@ def populate_db_financial_statements():
                         value = dic[date]
                         if (value):
                             feature_id = get_feature_id(feature_name)
-                            sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE value=%s"
+                            sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, " \
+                                  "%s, %s, %s) ON DUPLICATE KEY UPDATE value=%s "
+                            val = [company_id, feature_id, date, value, value]
+                            cursor.execute(sql, val)
+                connection.commit()
+
+
+def populate_db_financial_statements_income_statement():
+    url_pattern = "https://www.macrotrends.net/stocks/charts/{}/{}/income-statement?freq=Q"
+    connection, cursor = get_connection_cursor()
+    for (company_id, ticker, company_name) in tqdm(company_iterator()):
+        json: Optional[Any] = get_json_from_macrotrends(url_pattern, ticker, company_name)
+        if (json):
+            for dic in json:
+                link = dic['field_name']
+                feature_name = extractFeautreName(link)
+                for key in dic:
+                    if (is_date(key)):
+                        date = key
+                        value = dic[date]
+                        if (value):
+                            feature_id = get_feature_id(feature_name)
+                            sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, " \
+                                  "%s, %s, %s) ON DUPLICATE KEY UPDATE value=%s "
                             val = [company_id, feature_id, date, value, value]
                             cursor.execute(sql, val)
                 connection.commit()
 
 
 # url pattern example: "https://www.macrotrends.net/stocks/charts/MSFT/microsoft/income-statement?freq=Q"
-def getTextFromMacrotrends(tickerName, companyName):
-    url = 'https://www.macrotrends.net/stocks/charts/{}/{}/income-statement?freq=Q'.format(tickerName, companyName)
+def get_text_from_macrotrends(url_pattern, ticker_name, company_name):
+    url = url_pattern.format(ticker_name, company_name)
     print(f'url = {url}')
     try:
         connection = urlopen(url)
         html = connection.read()
         # print(f'html = {html}')
         text = getString(html)
-        return extractOriginalData(text)
+        return extract_original_data(text)
     except:
         print(f'failed to read url: {url}')
         return None
 
 
-def getJsonFromMacrotrends(tickerName, companyName) -> object:
-    jsonStr = getTextFromMacrotrends(tickerName, companyName)
-    if (jsonStr):
-        return json.loads(jsonStr)
+def get_json_from_macrotrends(url_pattern, ticker_name, company_name) -> object:
+    json_str = get_text_from_macrotrends(url_pattern, ticker_name, company_name)
+    if (json_str):
+        return json.loads(json_str)
     return None
 
 
-def extractOriginalData(text: object) -> object:
+def extract_original_data(text: object) -> object:
     match = original_data_pattern.search(text)
     # match = re.search('var originalData = (.+);\s+var source =', text)
     if (match):
@@ -78,6 +103,10 @@ def extractOriginalData(text: object) -> object:
         print('not found')
         return None
 
+
+
+if __name__ == '__main__':
+    populate_db_financial_statements_financial_ratios()
 
 #################################################################################################
 
@@ -108,16 +137,16 @@ def getTickersInfoTRY(list):
     return dic
 
 
-def getTickerInfoFromJsonFileTRY(tickerName):
-    tickerFileName = 'resources\\' + tickerName + '.json'
-    if os.path.isfile(tickerFileName):
-        file = open(tickerFileName, 'r')
-        fileText = file.read()
-        data = json.loads(fileText)
-    else:
-        companyName = getCompanyNameFromJsonFileTRY(tickerName)
-        print(f'loading {companyName} ticker: {tickerName} info')
-        jsonStr = getTextFromMacrotrends(tickerName, companyName)
-        data = json.loads(jsonStr)
-        writeToFileAsJSON(data, tickerFileName)
-    return data
+# def getTickerInfoFromJsonFileTRY(tickerName):
+#     tickerFileName = 'resources\\' + tickerName + '.json'
+#     if os.path.isfile(tickerFileName):
+#         file = open(tickerFileName, 'r')
+#         fileText = file.read()
+#         data = json.loads(fileText)
+#     else:
+#         companyName = getCompanyNameFromJsonFileTRY(tickerName)
+#         print(f'loading {companyName} ticker: {tickerName} info')
+#         jsonStr = get_text_from_macrotrends(tickerName, companyName)
+#         data = json.loads(jsonStr)
+#         writeToFileAsJSON(data, tickerFileName)
+#     return data
