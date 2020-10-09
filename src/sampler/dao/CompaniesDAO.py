@@ -1,10 +1,10 @@
 from utils.SqlUtils import get_connection_cursor
 
 
-def company_iterator():
+def get_all_companies():
     connection, cursor = get_connection_cursor()
     sql = "select c.id, c.ticker, c.comp_name from shares.companies c where c.ticker = 'AMZN'"
-    sql = "select c.id, c.ticker, c.comp_name from shares.companies"
+    sql = "select c.id, c.ticker, c.comp_name from shares.companies c"
     cursor.execute(sql)
     return cursor.fetchall()
     # print('cursor = ',cursor)

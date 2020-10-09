@@ -6,9 +6,9 @@ from urllib.request import urlopen
 
 from tqdm import tqdm
 
-
 # "<a href='/stocks/charts/MSFT/microsoft/revenue'>Revenue</a>
-from sampler.dao.CompaniesDAO import company_iterator
+from sampler.dao import CompaniesDAO
+from sampler.dao.CompaniesDAO import get_all_companies
 from sampler.dao.FeaturesDAO import get_feature_id
 from utils.DateUtils import is_date
 from utils.FileUtils import writeToFileAsJSON
@@ -18,56 +18,46 @@ from utils.StrUtils import getString
 feature_name_pattern = re.compile('[^>]+>(.+)<')
 original_data_pattern = re.compile('var originalData = (.+);\\s+var source =')
 
+
 def extractFeautreName(link):
     found = feature_name_pattern.match(link)
     if found:
         found = found.group(1)
     return found
 
-# https://www.macrotrends.net/stocks/charts/AMZN/amazon/financial-ratios?freq=Q
 
-def populate_db_financial_statements_financial_ratios():
+def populate_db_financial_statements(url_pattern, companies=None):
+    companies = companies or CompaniesDAO.get_all_companies()
+    connection, cursor = get_connection_cursor()
+    for (company_id, ticker, company_name) in tqdm(companies):
+        json: Optional[Any] = get_json_from_macrotrends(url_pattern, ticker, company_name)
+        if (json):
+            for dic in json:
+                link = dic['field_name']
+                feature_name = extractFeautreName(link)
+                for key in dic:
+                    if (is_date(key)):
+                        date = key
+                        value = dic[date]
+                        if (value):
+                            feature_id = get_feature_id(feature_name)
+                            sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, " \
+                                  "%s, %s, %s) ON DUPLICATE KEY UPDATE value=%s "
+                            val = [company_id, feature_id, date, value, value]
+                            cursor.execute(sql, val)
+                connection.commit()
+
+
+def populate_db_financial_statements_financial_ratios(companies_list=None):
+    companies_list = companies_list or get_companies_not_in_db(23)
     url_pattern = "https://www.macrotrends.net/stocks/charts/{}/{}/financial-ratios?freq=Q"
-    connection, cursor = get_connection_cursor()
-    for (company_id, ticker, company_name) in tqdm(company_iterator()):
-        json: Optional[Any] = get_json_from_macrotrends(url_pattern, ticker, company_name)
-        if (json):
-            for dic in json:
-                link = dic['field_name']
-                feature_name = extractFeautreName(link)
-                for key in dic:
-                    if (is_date(key)):
-                        date = key
-                        value = dic[date]
-                        if (value):
-                            feature_id = get_feature_id(feature_name)
-                            sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, " \
-                                  "%s, %s, %s) ON DUPLICATE KEY UPDATE value=%s "
-                            val = [company_id, feature_id, date, value, value]
-                            cursor.execute(sql, val)
-                connection.commit()
+    populate_db_financial_statements(url_pattern, companies_list)
 
 
-def populate_db_financial_statements_income_statement():
+def populate_db_financial_statements_income_statement(companies_list=None):
+    companies_list = companies_list or get_companies_not_in_db(1)
     url_pattern = "https://www.macrotrends.net/stocks/charts/{}/{}/income-statement?freq=Q"
-    connection, cursor = get_connection_cursor()
-    for (company_id, ticker, company_name) in tqdm(company_iterator()):
-        json: Optional[Any] = get_json_from_macrotrends(url_pattern, ticker, company_name)
-        if (json):
-            for dic in json:
-                link = dic['field_name']
-                feature_name = extractFeautreName(link)
-                for key in dic:
-                    if (is_date(key)):
-                        date = key
-                        value = dic[date]
-                        if (value):
-                            feature_id = get_feature_id(feature_name)
-                            sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, " \
-                                  "%s, %s, %s) ON DUPLICATE KEY UPDATE value=%s "
-                            val = [company_id, feature_id, date, value, value]
-                            cursor.execute(sql, val)
-                connection.commit()
+    populate_db_financial_statements(url_pattern, companies_list)
 
 
 # url pattern example: "https://www.macrotrends.net/stocks/charts/MSFT/microsoft/income-statement?freq=Q"
@@ -103,10 +93,18 @@ def extract_original_data(text: object) -> object:
         print('not found')
         return None
 
+def get_companies_not_in_db(feature_id):
+    connection, cursor = get_connection_cursor()
+    sql = f"select c.id, c.ticker, c.comp_name from shares.companies c where c.id NOT IN (SELECT distinct " \
+          f"d.company_id FROM shares.feature_data d WHERE d.feature_id = {feature_id}) "
+    cursor.execute(sql)
+    return cursor.fetchall()
 
 
 if __name__ == '__main__':
     populate_db_financial_statements_financial_ratios()
+    populate_db_financial_statements_income_statement()
+
 
 #################################################################################################
 
@@ -129,12 +127,12 @@ def getCompanyNameFromJsonFileTRY(tickerName):
 
     return 'unknown'
 
-def getTickersInfoTRY(list):
-    dic = dict()
-    for ticker in list:
-        tickerInfo = getTickerInfoFromJsonFileTRY(ticker)
-        dic[ticker] = tickerInfo
-    return dic
+# def getTickersInfoTRY(list):
+#     dic = dict()
+#     for ticker in list:
+#         tickerInfo = getTickerInfoFromJsonFileTRY(ticker)
+#         dic[ticker] = tickerInfo
+#     return dic
 
 
 # def getTickerInfoFromJsonFileTRY(tickerName):
