@@ -17,7 +17,7 @@ from collections import defaultdict
 
 
 def choose_companies():
-    companies_ids = range(1,100)
+    companies_ids = range(1, 20)
     # companies_ids = [3]
     companies_tickers = get_tickers(companies_ids)
     # companies_tickers = ["AVGO","MSFT"]
@@ -28,7 +28,7 @@ def choose_companies():
 
 
 def choose_dates():
-    start_date = "2015-09-30"
+    start_date = "2017-09-30"
     end_date = "2020-09-30"
     date_str_list = get_quraterly_dates_between(start_date, end_date)
     print(f"Dates are: {len(date_str_list)} dates: ({start_date} -- {end_date})")
@@ -37,7 +37,7 @@ def choose_dates():
 
 def choose_features():
     features_ids = [1, 4, 5, 2, 3, 7]
-    features_ids = [1, 3, 7, 8, 10, 11, 12, 19, 20, 21, 22]
+    # features_ids = [1, 3, 7, 8, 10, 11, 12, 19, 20, 21, 22]
     # features_ids = [4, 5]
 
     print(f"{len(features_ids)} features, names are: {get_features_names(features_ids)}\n")
@@ -92,15 +92,12 @@ def is_valid_sample(raw_sample, features_names):
     return is_valid
 
 
-
-
 @timeit(message=None)
 def get_yahoo_responses(companies_ids, date_str_list):
-
     dateticker_to_closingprice_map = {}
 
     ticker_list = get_tickers(companies_ids)
-    for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each"):
+    for date_str in tqdm(date_str_list, desc="looping over all given quarters, calling Yahoo on each", colour="CYAN"):
 
         date = str_to_date(date_str)
         missing_tickers = TickersPricesDAO.get_missing_tickers(date, ticker_list)
@@ -109,7 +106,8 @@ def get_yahoo_responses(companies_ids, date_str_list):
         if sizeof_missing_tickers:
             end_date = date + datetime.timedelta(days=3)
             end_date_str = str(end_date)
-            print(f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {sizeof_missing_tickers} missing tickers: {missing_tickers},  ')
+            print(
+                f'\nis about to download stock info from yahoo. Original date: {date_str}, looking for range ({date_str} -- {end_date_str}). Looking for {sizeof_missing_tickers} missing tickers: {missing_tickers},  ')
             data = yf.download(missing_tickers, start=date_str, end=end_date_str, period="1d")
             print(data)
             single_date_map = create_dateticker_to_closingprice(data, missing_tickers, date)
@@ -122,7 +120,6 @@ def get_yahoo_responses(companies_ids, date_str_list):
 
 
 def create_dateticker_to_closingprice(data, missing_tickers, date):
-
     map = {}
     nbd = next_business_day(date)
     nbd_str = str(nbd)
@@ -153,7 +150,7 @@ def convert_illegal_values_to_negative(yahoo_closing_price):
 
 
 def insert_data_into_db(single_date_map):
-    for (date,ticker),closing_price in single_date_map.items():
+    for (date, ticker), closing_price in single_date_map.items():
         TickersPricesDAO.insert_closing_price(ticker, date, closing_price)
 
 
@@ -167,7 +164,7 @@ def get_response_from_yahoo_or_db(yahoo_responses, ticker, date_obj: datetime.da
 
     if (date_obj, ticker) in yahoo_responses:
         # try to get from responses (yahoo)
-        closing_price =  yahoo_responses[(date_obj, ticker)]
+        closing_price = yahoo_responses[(date_obj, ticker)]
     else:
         # try to get from DB
         closing_price = TickersPricesDAO.get_closing_price(date_obj, ticker)
@@ -197,7 +194,7 @@ def build_X_and_y(raw_samples, yahoo_responses, features_names):
     y = []
     sample_names = []
 
-    for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples'):
+    for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples', colour="CYAN"):
         if is_valid_sample(raw_sample, features_names):
             response = get_response_from_yahoo_or_db(yahoo_responses, raw_sample.ticker, raw_sample.date_obj)
             if is_valid_response(response):
@@ -207,7 +204,8 @@ def build_X_and_y(raw_samples, yahoo_responses, features_names):
 
     size_of_valid_samples = len(sample_names)
     size_of_raw_samples = len(raw_samples)
-    print(f"\n{color.BLUE}there are {size_of_valid_samples} valid samples, which are %{(100*size_of_valid_samples / size_of_raw_samples):2.2f} percent of potential samples{color.END}")
+    print(
+        f"\n{color.BLUE}there are {size_of_valid_samples} valid samples, which are %{(100 * size_of_valid_samples / size_of_raw_samples):2.2f} percent of potential samples{color.END}")
     sorted_non_valid_features = {k: v for k, v in sorted(stat_of_non_valid_features.items(), key=lambda item: item[1])}
     print(f"\n{color.BLUE}Bad features: \n{sorted_non_valid_features}{color.END}")
 
@@ -268,17 +266,17 @@ if __name__ == '__main__':
 #
 #     return dateticker_to_closingprice_map
 
-    # try:
-    #     # try to get from responses (yahoo)
-    #     # closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
-    #     return yahoo_responses[(date_obj, ticker)]
-    #     # insert_closing_price(ticker, date_obj, closing_price)
-    # except:
-    #     # try to get from DB
-    #     # closing_price = get_closing_price(date_obj, ticker)
-    #     closing_price = TickersPricesDAO.get_closing_price(date_obj, ticker)
-    #     if not closing_price:
-    #         print(f"Failed to get response for {ticker} {date_obj}")
+# try:
+#     # try to get from responses (yahoo)
+#     # closing_price = responses[date_obj]["Close"][ticker][str(nbd)]
+#     return yahoo_responses[(date_obj, ticker)]
+#     # insert_closing_price(ticker, date_obj, closing_price)
+# except:
+#     # try to get from DB
+#     # closing_price = get_closing_price(date_obj, ticker)
+#     closing_price = TickersPricesDAO.get_closing_price(date_obj, ticker)
+#     if not closing_price:
+#         print(f"Failed to get response for {ticker} {date_obj}")
 
 # def add_single_dateticker_to_closingprice(map, date, ticker, closing_price):
 #     if is_valid_response(closing_price):

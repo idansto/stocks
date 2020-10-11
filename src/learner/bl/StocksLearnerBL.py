@@ -1,15 +1,16 @@
-# from sklearn.neural_network import MLPRegressor
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
 
 from utils.TimerDecorator import timeit
 
 
 class StocksLearner:
     learner = MLPRegressor(random_state=1, max_iter=10000)
-    # learner = KNeighborsRegressor(n_neighbors=2)
+    # learner = KNeighborsRegressor(n_neighbors=12)
     # learner = LinearRegression()
 
     print(f"learner type is: {type(learner)}")
@@ -39,15 +40,16 @@ class StocksLearner:
         ratio_vector_df = pd.DataFrame(ratio_vector)
         table = pd.concat([y_test, y_prediction], axis=1)
         print(table)
-        print(f"\nrelative_score -->  {relative_score * 100: 2.2f}%")
+        print(f"\nrelative_score -->  {relative_score * 100: 2.2f}% mistake relates to ground truth")
 
-    def split_samples(self, X, y):  # TODO: use sklearn split method.
+    def split_samples(self, X, y):
         # return X[:len(X) // 2], y[:len(y) // 2], X[len(X) // 2:], y[len(y) // 2:]
         # return train_test_split(X, y, test_size = 0.20, random_state = 42)
         return train_test_split(X, y, test_size=0.20, shuffle=False)
 
     @timeit(message="The learning phase")
     def run(self, X, y):
+        X, y = self.preproccess_data(X, y)
         X_train, X_test, y_train, y_test = self.split_samples(X, y)
         self.fit(X_train, y_train.values.ravel())
         y_prediction = self.predict(X_test)
@@ -62,6 +64,17 @@ class StocksLearner:
         result = np.absolute(ratios - ones)
         return result.mean(), result
 
+    def preproccess_data(self, X, y):
+        sc = StandardScaler()
+        sc.fit(X)
+        X_processed = sc.transform(X)
+        X_processed_df = pd.DataFrame(X_processed, columns=X.columns, index=X.index)
+        print(X_processed_df)
+        return X_processed_df, y
+
 
 if __name__ == '__main__':
-    pass
+    learner = StocksLearner()
+    x1, y2 = learner.preproccess_data(pd.DataFrame([[1, 2, 3], [4, 5, 6], [7, 8, 9]]), [10, 20, 30])
+    print(x1)
+    print(y2)

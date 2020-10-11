@@ -29,7 +29,7 @@ def extractFeautreName(link):
 def populate_db_financial_statements(url_pattern, companies=None):
     companies = companies or CompaniesDAO.get_all_companies()
     connection, cursor = get_connection_cursor()
-    for (company_id, ticker, company_name) in tqdm(companies):
+    for (company_id, ticker, company_name) in tqdm(companies, colour="CYAN"):
         json: Optional[Any] = get_json_from_macrotrends(url_pattern, ticker, company_name)
         if (json):
             for dic in json:

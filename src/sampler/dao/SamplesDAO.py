@@ -21,7 +21,7 @@ def get_samples_with_all(company_ids, date_list, global_features_ids, abs_featur
     cursor.execute(sql)
 
     sample_wrapper_list = []
-    for row in tqdm(cursor):
+    for row in tqdm(cursor, colour="CYAN"):
         row_list = list(row)
         company_id = row_list[COMPANY_ID]
         ticker = row_list[TICKER]
