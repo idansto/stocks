@@ -8,7 +8,7 @@ from tqdm import tqdm
 from sampler.dao import TickersPricesDAO
 from sampler.dao.CompaniesDAO import get_tickers
 from sampler.dao.FeaturesDAO import get_features_names
-from src.sampler.dao.SamplesDAO import get_samples
+from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_with_all
 from utils import DictUtils
 from utils.Colors import color
 from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
@@ -17,7 +17,7 @@ from collections import defaultdict
 
 
 def choose_companies():
-    companies_ids = range(1, 20)
+    companies_ids = range(1, 10)
     # companies_ids = [3]
     companies_tickers = get_tickers(companies_ids)
     # companies_tickers = ["AVGO","MSFT"]
@@ -28,7 +28,7 @@ def choose_companies():
 
 
 def choose_dates():
-    start_date = "2017-09-30"
+    start_date = "2019-09-30"
     end_date = "2020-09-30"
     date_str_list = get_quraterly_dates_between(start_date, end_date)
     print(f"Dates are: {len(date_str_list)} dates: ({start_date} -- {end_date})")
@@ -46,6 +46,14 @@ def choose_features():
     return features_ids, features_names
 
 
+def choose_abs_features():
+    return [1]
+
+
+def choose_global_features():
+    return [1]
+
+
 class Sampler:
 
     @timeit(message=None)
@@ -54,9 +62,11 @@ class Sampler:
         companies_ids, companies_tickers = choose_companies()
         date_str_list = choose_dates()
         features_ids, features_names = choose_features()
+        abs_features = choose_abs_features()
+        global_features = choose_global_features()
 
         # get samples from DB
-        raw_samples = get_samples(companies_ids, date_str_list, features_ids)
+        raw_samples = get_samples_with_all(companies_ids, date_str_list, global_features, abs_features, features_ids)
 
         # get responses from Yahoo
         yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
@@ -68,7 +78,8 @@ class Sampler:
         X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, features_names)
 
         # create DataFrame for X and y (samples and results)
-        X_df, y_df = build_data_frames(X, features_names, sample_names, y)
+        all_features_name = global_features + abs_features + features_names
+        X_df, y_df = build_data_frames(X, all_features_name, sample_names, y)
 
         return X_df, y_df
 
