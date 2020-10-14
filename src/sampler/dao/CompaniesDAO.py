@@ -7,8 +7,9 @@ reverse_abs_features = {v: k for k, v in abs_features_map.items()}
 def get_company_attribute_name(company_attribute_id):
     return abs_features_map[company_attribute_id]
 
+
 def get_company_attribute_names(company_attribute_ids):
-    return map(get_company_attribute_name, company_attribute_ids)
+    return list(map(get_company_attribute_name, company_attribute_ids))
 
 
 def get_company_attribute_id(company_attribute_name):
@@ -16,7 +17,7 @@ def get_company_attribute_id(company_attribute_name):
 
 
 def get_company_attribute_ids(company_attribute_names):
-    return map(get_company_attribute_id, company_attribute_names)
+    return list(map(get_company_attribute_id, company_attribute_names))
 
 
 def get_all_companies():

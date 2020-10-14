@@ -30,25 +30,39 @@ def populate_db_market_cap(companies=None):
     for (ticker,) in tqdm(companies):
         populate_single_ticker(connection, cursor, ticker)
 
+
 @timeit(message=None)
 def populate_single_ticker(connection, cursor, ticker):
     json: Optional[Any] = get_json_from_macrotrends(ticker)
-    if (json):
-        count = 1
+    if json:
+        my_data = []
         for dict in json:
             date = dict["date"]
             market_cap = dict["v1"]
-            sql = f"INSERT INTO shares.tickers_prices_fast (date, ticker, market_cap) VALUES ('{date}', '{ticker}', " \
-                  f"{market_cap}) ON DUPLICATE KEY UPDATE market_cap={market_cap}"
-            # sql = f"INSERT INTO shares.tickers_prices (date, ticker, market_cap) VALUES ('{date}', '{ticker}', " \
-            #       f"{market_cap})"
-            cursor.execute(sql)
-            # if count % 100 == 0:
-            #     connection.commit()
-            count += 1
+            t = tuple(date, ticker, market_cap, market_cap)
+            my_data.append(t)
+
+        sql = f"INSERT INTO shares.tickers_prices_fast (date, ticker, market_cap) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE market_cap=%s"
+        cursor.executemany(sql, my_data)
         print(f"there are {len(json)} dates for {ticker}")
         connection.commit()
         print("committed")
+
+        # count = 1
+        # for dict in json:
+        #     date = dict["date"]
+        #     market_cap = dict["v1"]
+        #     sql = f"INSERT INTO shares.tickers_prices_fast (date, ticker, market_cap) VALUES ('{date}', '{ticker}', " \
+        #           f"{market_cap}) ON DUPLICATE KEY UPDATE market_cap={market_cap}"
+        #     # sql = f"INSERT INTO shares.tickers_prices (date, ticker, market_cap) VALUES ('{date}', '{ticker}', " \
+        #     #       f"{market_cap})"
+        #     cursor.execute(sql)
+        #     # if count % 100 == 0:
+        #     #     connection.commit()
+        #     count += 1
+        # print(f"there are {len(json)} dates for {ticker}")
+        # connection.commit()
+        # print("committed")
 
 
 @timeit(message="time to get historical data from macrotrends")
