@@ -8,7 +8,7 @@
 #                  "Basic Shares Outstanding": "19", "Shares Outstanding": "20", "Basic EPS": "21",
 #                  "EPS - Earnings Per Share": "22"}
 
-features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3", "Research And Development Expenses": "4",
+company_metrics_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3", "Research And Development Expenses": "4",
                  "SG&A Expenses": "5", "Other Operating Income Or Expenses": "6", "Operating Expenses": "7",
                  "Operating Income": "8", "Total Non-Operating Income/Expense": "9", "Pre-Tax Income": "10",
                  "Income Taxes": "11", "Income After Taxes": "12", "Other Income": "13",
@@ -23,21 +23,24 @@ features_dict = {"Revenue": "1", "Cost Of Goods Sold": "2", "Gross Profit": "3",
                  "Book Value Per Share": "40", "Operating Cash Flow Per Share": "41", "Free Cash Flow Per Share": "42"}
 
 
+reverse_company_metrics_dict = {v: k for k, v in company_metrics_dict.items()}
 
 
-reverse_features_dict = {v: k for k, v in features_dict.items()}
+def get_metric_id(company_metric_name):
+    return company_metrics_dict[company_metric_name]
 
 
-def get_feature_id(feature_name):
-    return features_dict[feature_name]
+def get_metric_ids(company_metrics_names):
+    result = list(map(get_company_metric_name, company_metrics_names))
+    return result
 
 
-def get_feature_name(feature_id):
-    return reverse_features_dict[str(feature_id)]
+def get_company_metric_name(feature_id):
+    return reverse_company_metrics_dict[str(feature_id)]
 
 
 def get_company_metrics_names(feature_ids):
-    result = list(map(get_feature_name, feature_ids))
+    result = list(map(get_company_metric_name, feature_ids))
     return result
 
 

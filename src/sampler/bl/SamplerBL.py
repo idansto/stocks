@@ -58,6 +58,8 @@ def choose_global_metrics():
     return global_features_ids, global_features_names
 
 
+
+
 class Sampler:
 
     @timeit(message=None)
@@ -72,6 +74,9 @@ class Sampler:
         # get samples from DB
         raw_samples = get_samples_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
 
+        # # get responses from macrotrends
+        # macrotrends_responses = get_macrotrends_responses(companies_ids, date_str_list)
+
         # get responses from Yahoo
         yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
 
@@ -79,6 +84,7 @@ class Sampler:
         insert_data_into_db(yahoo_responses)
 
         # build X and y
+        # X, y, sample_names = build_X_and_y(raw_samples, macrotrends_responses, company_metrics_names)
         X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, company_metrics_names)
 
         # create DataFrame for X and y (samples and results)
@@ -105,6 +111,10 @@ def is_valid_sample(raw_sample, features_names):
         print(f"bad raw_sample: {raw_sample}")
 
     return is_valid
+
+
+def get_macrotrends_responses(companies_ids, date_str_list):
+    pass
 
 
 @timeit(message=None)

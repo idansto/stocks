@@ -1,6 +1,6 @@
 import unittest
 
-from sampler.dao.FeaturesDAO import get_company_metrics_names, get_feature_name
+from sampler.dao.FeaturesDAO import get_company_metrics_names, get_company_metric_name
 
 
 class TestFeaturesDAO(unittest.TestCase):
@@ -10,5 +10,5 @@ class TestFeaturesDAO(unittest.TestCase):
         print(names_list)
 
     def test_get_feature_name(self):
-        name = get_feature_name(1)
+        name = get_company_metric_name(1)
         print(name)

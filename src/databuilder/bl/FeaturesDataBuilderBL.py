@@ -9,7 +9,7 @@ from tqdm import tqdm
 # "<a href='/stocks/charts/MSFT/microsoft/revenue'>Revenue</a>
 from sampler.dao import CompaniesDAO
 from sampler.dao.CompaniesDAO import get_all_companies
-from sampler.dao.FeaturesDAO import get_feature_id
+from sampler.dao.FeaturesDAO import get_metric_id
 from utils.DateUtils import is_date
 from utils.FileUtils import writeToFileAsJSON
 from utils.SqlUtils import get_connection_cursor
@@ -40,7 +40,7 @@ def populate_db_financial_statements(url_pattern, companies=None):
                         date = key
                         value = dic[date]
                         if (value):
-                            feature_id = get_feature_id(feature_name)
+                            feature_id = get_metric_id(feature_name)
                             sql = "INSERT INTO shares.feature_data (company_id, feature_id, date, value) VALUES (%s, " \
                                   "%s, %s, %s) ON DUPLICATE KEY UPDATE value=%s "
                             val = [company_id, feature_id, date, value, value]
