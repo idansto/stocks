@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from sampler.dao import TickersPricesDAO
 from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names
-from sampler.dao.FeaturesDAO import get_features_names
+from sampler.dao.FeaturesDAO import get_company_metrics_names
 from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_with_all
 from utils import DictUtils
 from utils.Colors import color
@@ -35,26 +35,26 @@ def choose_dates():
     return date_str_list
 
 
-def choose_features():
-    features_ids = [1, 4, 5, 2, 3, 7]
-    # features_ids = [1, 3, 7, 8, 10, 11, 12, 19, 20, 21, 22]
-    # features_ids = [4, 5]
+def choose_company_metrics():
+    company_metrics_ids = [1, 4, 5, 2, 3, 7]
+    # company_metrics_ids = [1, 3, 7, 8, 10, 11, 12, 19, 20, 21, 22]
+    # company_metrics_ids = [4, 5]
 
-    print(f"{len(features_ids)} features, names are: {get_features_names(features_ids)}\n")
+    print(f"{len(company_metrics_ids)} companies_metrics names are: {get_company_metrics_names(company_metrics_ids)}\n")
 
-    features_names = get_features_names(features_ids)
-    return features_ids, features_names
-
-
-def choose_abs_features():
-    abs_features_ids = [1]
-    abs_features_names = get_company_attribute_names(abs_features_ids)
-    return abs_features_ids, abs_features_names
+    features_names = get_company_metrics_names(company_metrics_ids)
+    return company_metrics_ids, features_names
 
 
-def choose_global_features():
+def choose_company_attributes():
+    company_attributes_ids = [1]
+    company_attributes_names = get_company_attribute_names(company_attributes_ids)
+    return company_attributes_ids, company_attributes_names
+
+
+def choose_global_metrics():
     global_features_ids = [1]
-    global_features_names = get_features_names(global_features_ids)  # todo: make func
+    global_features_names = get_company_metrics_names(global_features_ids)  # todo: make func
     return global_features_ids, global_features_names
 
 
@@ -65,12 +65,12 @@ class Sampler:
         # choose companies, dates and features
         companies_ids, companies_tickers = choose_companies()
         date_str_list = choose_dates()
-        features_ids, features_names = choose_features()
-        abs_features, abs_features_names = choose_abs_features()
-        global_features, global_features_names = choose_global_features()
+        company_metrics_ids, company_metrics_names = choose_company_metrics()
+        company_attributes_ids, company_attributes_names = choose_company_attributes()
+        global_metrics_ids, global_metrics_names = choose_global_metrics()
 
         # get samples from DB
-        raw_samples = get_samples_with_all(companies_ids, date_str_list, global_features, abs_features, features_ids)
+        raw_samples = get_samples_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
 
         # get responses from Yahoo
         yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
@@ -79,10 +79,10 @@ class Sampler:
         insert_data_into_db(yahoo_responses)
 
         # build X and y
-        X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, features_names)
+        X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, company_metrics_names)
 
         # create DataFrame for X and y (samples and results)
-        all_features_name = global_features_names + abs_features_names + features_names
+        all_features_name = global_metrics_names + company_attributes_names + company_metrics_names
         X_df, y_df = build_data_frames(X, all_features_name, sample_names, y)
 
         return X_df, y_df

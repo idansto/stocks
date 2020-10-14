@@ -36,7 +36,7 @@ def get_feature_name(feature_id):
     return reverse_features_dict[str(feature_id)]
 
 
-def get_features_names(feature_ids):
+def get_company_metrics_names(feature_ids):
     result = list(map(get_feature_name, feature_ids))
     return result
 
