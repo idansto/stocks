@@ -39,10 +39,10 @@ def populate_single_ticker(connection, cursor, ticker):
         for dict in json:
             date = dict["date"]
             market_cap = dict["v1"]
-            t = tuple(date, ticker, market_cap, market_cap)
+            t = (date, ticker, market_cap)
             my_data.append(t)
 
-        sql = f"INSERT INTO shares.tickers_prices_fast (date, ticker, market_cap) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE market_cap=%s"
+        sql = f"INSERT INTO shares.tickers_prices (date, ticker, market_cap) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap)"
         cursor.executemany(sql, my_data)
         print(f"there are {len(json)} dates for {ticker}")
         connection.commit()
