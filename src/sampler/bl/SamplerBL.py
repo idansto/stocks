@@ -6,7 +6,7 @@ import yfinance as yf
 from tqdm import tqdm
 
 from sampler.dao import TickersPricesDAO
-from sampler.dao.CompaniesDAO import get_tickers
+from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names
 from sampler.dao.FeaturesDAO import get_features_names
 from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_with_all
 from utils import DictUtils
@@ -47,11 +47,15 @@ def choose_features():
 
 
 def choose_abs_features():
-    return [1]
+    abs_features_ids = [1]
+    abs_features_names = get_company_attribute_names(abs_features_ids)
+    return abs_features_ids, abs_features_names
 
 
 def choose_global_features():
-    return [1]
+    global_features_ids = [1]
+    global_features_names = get_features_names(global_features_ids)  # todo: make func
+    return global_features_ids, global_features_names
 
 
 class Sampler:
@@ -62,8 +66,8 @@ class Sampler:
         companies_ids, companies_tickers = choose_companies()
         date_str_list = choose_dates()
         features_ids, features_names = choose_features()
-        abs_features = choose_abs_features()
-        global_features = choose_global_features()
+        abs_features, abs_features_names = choose_abs_features()
+        global_features, global_features_names = choose_global_features()
 
         # get samples from DB
         raw_samples = get_samples_with_all(companies_ids, date_str_list, global_features, abs_features, features_ids)
@@ -78,7 +82,7 @@ class Sampler:
         X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, features_names)
 
         # create DataFrame for X and y (samples and results)
-        all_features_name = global_features + abs_features + features_names
+        all_features_name = global_features_names + abs_features_names + features_names
         X_df, y_df = build_data_frames(X, all_features_name, sample_names, y)
 
         return X_df, y_df

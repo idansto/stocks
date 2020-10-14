@@ -49,7 +49,7 @@ class StocksLearner:
 
     @timeit(message="The learning phase")
     def run(self, X, y):
-        # X, y = self.preproccess_data(X, y)
+        X, y = self.preproccess_data(X, y)
         X_train, X_test, y_train, y_test = self.split_samples(X, y)
         self.fit(X_train, y_train.values.ravel())
         y_prediction = self.predict(X_test)
@@ -65,7 +65,8 @@ class StocksLearner:
         return result.mean(), result
 
     def preproccess_data(self, X, y):
-        X = pd.get_dummies(X, columns=['1'])
+        categorial_columns = ["exchangecho"]
+        X = pd.get_dummies(X, columns=categorial_columns)
 
         sc = StandardScaler()
         sc.fit(X)
