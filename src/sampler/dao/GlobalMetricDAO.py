@@ -10,5 +10,14 @@ def get_max_date_for_metric_id(id):
     return date
 
 
+def get_global_id():
+    pass
+
+
+def get_global_name():
+    pass
+
+
+
 
 

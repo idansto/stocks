@@ -31,8 +31,10 @@ reverse_features_dict = {v: k for k, v in features_dict.items()}
 def get_feature_id(feature_name):
     return features_dict[feature_name]
 
+
 def get_feature_name(feature_id):
     return reverse_features_dict[str(feature_id)]
+
 
 def get_features_names(feature_ids):
     result = list(map(get_feature_name, feature_ids))

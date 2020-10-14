@@ -1,3 +1,4 @@
+from sampler.dao.CompaniesDAO import abs_features_map
 from src.sampler.dto.RawSample import RawSample
 from src.utils.SqlUtils import get_connection_cursor
 from tqdm import tqdm
@@ -10,8 +11,6 @@ COMPANY_ID = 0
 TICKER = 1
 DATE = 2
 SAMPLE_START = 3
-
-abs_features_map = {1: "exchange", 2: "zacks_x_ind_desc", 3: "zacks_x_sector_desc", 4: "zacks_m_ind_desc", 5: "emp_cnt"}
 
 
 def get_samples_with_all(company_ids, date_list, global_features_ids, abs_features_ids, features_ids):
