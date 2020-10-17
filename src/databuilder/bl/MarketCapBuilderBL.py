@@ -33,6 +33,9 @@ def populate_db_market_cap(companies=None):
 
 @timeit(message=None)
 def populate_single_ticker(connection, cursor, ticker):
+    if not connection:
+        connection, cursor = get_connection_cursor()
+
     json: Optional[Any] = get_json_from_macrotrends(ticker)
     if json:
         my_data = []

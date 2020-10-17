@@ -1,6 +1,6 @@
 import unittest
 
-from sampler.dao.FeaturesDAO import get_company_metrics_names, get_company_metric_name
+from sampler.dao.ComapnyMetricsDAO import get_company_metrics_names, get_company_metric_name
 
 
 class TestFeaturesDAO(unittest.TestCase):

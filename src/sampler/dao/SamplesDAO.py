@@ -13,9 +13,9 @@ DATE = 2
 SAMPLE_START = 3
 
 
-def get_samples_with_all(company_ids, date_list, global_features_ids, abs_features_ids, features_ids):
+def get_samples_list_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids):
     connection, cursor = get_connection_cursor()
-    sql = getSamplesSql_with_all(company_ids, date_list, global_features_ids, abs_features_ids, features_ids)
+    sql = getSamplesSql_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
     print(sql)
     cursor.execute(sql)
 

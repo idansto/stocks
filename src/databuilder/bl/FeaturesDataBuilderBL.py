@@ -9,7 +9,7 @@ from tqdm import tqdm
 # "<a href='/stocks/charts/MSFT/microsoft/revenue'>Revenue</a>
 from sampler.dao import CompaniesDAO
 from sampler.dao.CompaniesDAO import get_all_companies
-from sampler.dao.FeaturesDAO import get_metric_id
+from sampler.dao.ComapnyMetricsDAO import get_metric_id
 from utils.DateUtils import is_date
 from utils.FileUtils import writeToFileAsJSON
 from utils.SqlUtils import get_connection_cursor

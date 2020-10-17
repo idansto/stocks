@@ -5,10 +5,11 @@ import pandas as pd
 import yfinance as yf
 from tqdm import tqdm
 
+from databuilder.bl import MarketCapBuilderBL
 from sampler.dao import TickersPricesDAO
 from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names
-from sampler.dao.FeaturesDAO import get_company_metrics_names
-from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_with_all
+from sampler.dao.ComapnyMetricsDAO import get_company_metrics_names
+from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_list_with_all
 from utils import DictUtils
 from utils.Colors import color
 from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
@@ -53,11 +54,9 @@ def choose_company_attributes():
 
 
 def choose_global_metrics():
-    global_features_ids = [1]
-    global_features_names = get_company_metrics_names(global_features_ids)  # todo: make func
-    return global_features_ids, global_features_names
-
-
+    global_metrics_ids = [1]
+    global_metrics_names = get_company_metrics_names(global_metrics_ids)  # todo: make func
+    return global_metrics_ids, global_metrics_names
 
 
 class Sampler:
@@ -72,10 +71,10 @@ class Sampler:
         global_metrics_ids, global_metrics_names = choose_global_metrics()
 
         # get samples from DB
-        raw_samples = get_samples_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
+        raw_samples = get_samples_list_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
 
-        # # get responses from macrotrends
-        # macrotrends_responses = get_macrotrends_responses(companies_ids, date_str_list)
+        # get responses from macrotrends
+        macrotrends_responses = get_macrotrends_responses(companies_ids, date_str_list)
 
         # get responses from Yahoo
         yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
@@ -84,8 +83,8 @@ class Sampler:
         insert_data_into_db(yahoo_responses)
 
         # build X and y
-        # X, y, sample_names = build_X_and_y(raw_samples, macrotrends_responses, company_metrics_names)
-        X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, company_metrics_names)
+        X, y, sample_names = build_X_and_y_macrotrends(raw_samples, macrotrends_responses, company_metrics_names)
+        # X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, company_metrics_names)
 
         # create DataFrame for X and y (samples and results)
         all_features_name = global_metrics_names + company_attributes_names + company_metrics_names
@@ -114,7 +113,22 @@ def is_valid_sample(raw_sample, features_names):
 
 
 def get_macrotrends_responses(companies_ids, date_str_list):
-    pass
+    dateticker_to_capprice_map = {}
+    ticker_list = get_tickers(companies_ids)
+    for date_str in tqdm(date_str_list, desc="looping over all given quarters", colour="CYAN"):
+        date = str_to_date(date_str)
+        for ticker in ticker_list:
+            market_cap = get_market_cap(date_str, ticker)
+            dateticker_to_capprice_map[(date,ticker)] = market_cap
+    return dateticker_to_capprice_map
+
+
+def get_market_cap(date_str, ticker):
+    market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
+    if not market_cap:
+        MarketCapBuilderBL.populate_single_ticker(ticker)
+        market_cap = TickersPricesDAO.get_market_cap()
+    return market_cap
 
 
 @timeit(message=None)
@@ -214,6 +228,32 @@ def build_data_frames(X, features_names, sample_names, y):
 
 
 @timeit(message=None)
+def build_X_and_y_macrotrends(raw_samples, macrotrends_responses, features_names):
+    X = []
+    y = []
+    sample_names = []
+
+    for i in range(len(raw_samples)):
+        raw_sample = raw_samples[i]
+        response = macrotrends_responses[i]
+        feature_name = features_names[i]
+        if is_valid_sample(raw_sample, feature_name) and is_valid_response(response):
+            X.append(raw_sample.sample)
+            y.append(response)
+            sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+
+    size_of_valid_samples = len(sample_names)
+    size_of_raw_samples = len(raw_samples)
+    print(
+        f"\n{color.BLUE}there are {size_of_valid_samples} valid samples, which are "
+        f"%{(100 * size_of_valid_samples / size_of_raw_samples):2.2f} percent of potential samples{color.END}")
+    sorted_non_valid_features = {k: v for k, v in sorted(stat_of_non_valid_features.items(), key=lambda item: item[1])}
+    print(f"\n{color.BLUE}Bad features: \n{sorted_non_valid_features}{color.END}")
+
+    return X, y, sample_names
+
+
+@timeit(message=None)
 def build_X_and_y(raw_samples, yahoo_responses, features_names):
     X = []
     y = []
@@ -230,7 +270,8 @@ def build_X_and_y(raw_samples, yahoo_responses, features_names):
     size_of_valid_samples = len(sample_names)
     size_of_raw_samples = len(raw_samples)
     print(
-        f"\n{color.BLUE}there are {size_of_valid_samples} valid samples, which are %{(100 * size_of_valid_samples / size_of_raw_samples):2.2f} percent of potential samples{color.END}")
+        f"\n{color.BLUE}there are {size_of_valid_samples} valid samples, which are "
+        f"%{(100 * size_of_valid_samples / size_of_raw_samples):2.2f} percent of potential samples{color.END}")
     sorted_non_valid_features = {k: v for k, v in sorted(stat_of_non_valid_features.items(), key=lambda item: item[1])}
     print(f"\n{color.BLUE}Bad features: \n{sorted_non_valid_features}{color.END}")
 

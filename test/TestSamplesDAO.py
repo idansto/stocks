@@ -1,7 +1,7 @@
 import unittest
 
 from sampler.dao.SamplesDAO import create_dates_table, create_features_select_list, create_companies, \
-    create_small_features_select_list, get_samples_sql, get_samples, get_samples_with_abs_features, get_samples_with_all
+    create_small_features_select_list, get_samples_sql, get_samples, get_samples_with_abs_features, get_samples_list_with_all
 
 
 class TestSamplesDAO(unittest.TestCase):
@@ -49,7 +49,7 @@ class TestSamplesDAO(unittest.TestCase):
                          "SOFT/SERV', 38297.0, 18553.0, 19744.0]]", str(sampleList))
 
     def test_get_samples_with_all(self):
-        sample_list = get_samples_with_all(company_ids=[1,2], date_list=["2020-3-31","2020-6-30"], global_features_ids=[1,2], abs_features_ids=[3,4], features_ids=[1,2,3])
+        sample_list = get_samples_list_with_all(company_ids=[1, 2], date_list=["2020-3-31", "2020-6-30"], global_metrics_ids=[1, 2], company_attributes_ids=[3, 4], company_metrics_ids=[1, 2, 3])
         print(sample_list)
         self.assertEqual("[company_id = 1, ticker = AAPL, date = 2020-3-31, sample = [0.08, 0.7, 'Computer and "
                          "Technology', 'COMPUTER/OFFICE EQUIP', 58313.0, 35943.0, 22370.0], company_id = 2, "

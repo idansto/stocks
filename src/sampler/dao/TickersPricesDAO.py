@@ -10,6 +10,15 @@ def get_closing_price(date, ticker):
     return closing_price
 
 
+def get_market_cap(date, ticker):
+    connection, cursor = get_connection_cursor()
+    sql = f"select t.market_cap from shares.tickers_prices t where t.date = '{date}' and t.ticker = '{ticker}'"
+    # print(f"sql is: {sql}")
+    cursor.execute(sql)
+    (market_cap,) = cursor.fetchone()
+    return market_cap
+
+
 def insert_closing_price(ticker, date_obj, closing_price):
     connection, cursor = get_connection_cursor()
     sql = f"INSERT INTO shares.tickers_prices (date, ticker, closing_price) VALUES ('{date_obj}', '{ticker}', {closing_price})"
