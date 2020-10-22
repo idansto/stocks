@@ -3,7 +3,7 @@ import unittest
 import yfinance as yf
 import datetime
 
-from pandas import DataFrame
+from pandas import DataFrame, np
 
 from utils.DateUtils import str_to_date, next_business_day
 
@@ -99,7 +99,11 @@ class TestYahooFinance(unittest.TestCase):
         # data1 = yf.download(["MSFT", ""], start='2019-09-30', end='2019-10-04', period="1d")
         pass
 
-
+    def test_log(self):
+        y = [0.08, 1,2,4,8,16]
+        log_y = np.log(y)
+        print(f"y    ={y}")
+        print(f"log_y={log_y}")
 
 if __name__ == '__main__':
     unittest.main()

@@ -64,3 +64,13 @@ def get_quraterly_dates_between(start_date_str, end_date_str):  # TODO
         next_quarter_date = str_to_date(next_quarter_date_str)
 
     return dates_list
+
+
+def is_before(date_str, start):
+    date = str_to_date(date_str)
+    return date < start
+
+
+def is_after(date_str, last_date):
+    date = str_to_date(date_str)
+    return date > last_date

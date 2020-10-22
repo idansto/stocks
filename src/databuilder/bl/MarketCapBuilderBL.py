@@ -32,7 +32,7 @@ def populate_db_market_cap(companies=None):
 
 
 @timeit(message=None)
-def populate_single_ticker(connection, cursor, ticker):
+def populate_single_ticker(connection=None, cursor=None, ticker=None):
     if not connection:
         connection, cursor = get_connection_cursor()
 

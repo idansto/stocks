@@ -34,12 +34,19 @@ class StocksLearner:
         # print("\nTEST RESULT PREDCTION (y_prediction): ")
         # print(y_prediction.transpose().round(2))
 
-        print('\nACTUAL Vs PREDICTION (y_test vs y_prediction)')
-        relative_score, ratio_vector = self.relative_score(y_test, y_prediction)
+        print('\nACTUAL Vs PREDICTION (y_test vs y_prediction) - log values')
+        table1 = pd.concat([y_test, y_prediction], axis=1)
+        print(table1)
 
+        relative_score, ratio_vector = self.relative_score(y_test, y_prediction)
         ratio_vector_df = pd.DataFrame(ratio_vector)
-        table = pd.concat([y_test, y_prediction], axis=1)
-        print(table)
+
+        print('\nACTUAL Vs PREDICTION (y_test_exp vs y_prediction_exp) - real values')
+        y_test_exp = np.exp(y_test)
+        y_prediction_exp = np.exp(y_prediction)
+        table2 = pd.concat([y_test_exp, y_prediction_exp], axis=1)
+        print(table2)
+
         print(f"\nrelative_score -->  {relative_score * 100: 2.2f}% mistake relates to ground truth")
 
     def split_samples(self, X, y):
@@ -65,15 +72,18 @@ class StocksLearner:
         return result.mean(), result
 
     def preproccess_data(self, X, y):
-        categorial_columns = ["exchangecho"]
-        X = pd.get_dummies(X, columns=categorial_columns)
+        categorial_columns = ["exchange"]
+        # X = pd.get_dummies(X, columns=categorial_columns)
+        X2 = np.log(X)
+        y2 = np.log(y)
 
-        sc = StandardScaler()
-        sc.fit(X)
-        X_processed = sc.transform(X)
-        X_processed_df = pd.DataFrame(X_processed, columns=X.columns, index=X.index)
-        print(X_processed_df)
-        return X_processed_df, y
+        # sc = StandardScaler()
+        # sc.fit(X)
+        # X_processed = sc.transform(X)
+        # X_processed_df = pd.DataFrame(X_processed, columns=X.columns, index=X.index)
+        # print(X_processed_df)
+        # return X_processed_df, y
+        return X2, y2
 
 
 if __name__ == '__main__':

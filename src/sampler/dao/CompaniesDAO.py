@@ -1,11 +1,11 @@
 from utils.SqlUtils import get_connection_cursor
 
-abs_features_map = {1: "exchange", 2: "zacks_x_ind_desc", 3: "zacks_x_sector_desc", 4: "zacks_m_ind_desc", 5: "emp_cnt"}
-reverse_abs_features = {v: k for k, v in abs_features_map.items()}
+company_attributes_map = {1: "exchange", 2: "zacks_x_ind_desc", 3: "zacks_x_sector_desc", 4: "zacks_m_ind_desc", 5: "emp_cnt"}
+reverse_company_attributes_map = {v: k for k, v in company_attributes_map.items()}
 
 
 def get_company_attribute_name(company_attribute_id):
-    return abs_features_map[company_attribute_id]
+    return company_attributes_map[company_attribute_id]
 
 
 def get_company_attribute_names(company_attribute_ids):
@@ -13,7 +13,7 @@ def get_company_attribute_names(company_attribute_ids):
 
 
 def get_company_attribute_id(company_attribute_name):
-    return reverse_abs_features[company_attribute_name]
+    return reverse_company_attributes_map[company_attribute_name]
 
 
 def get_company_attribute_ids(company_attribute_names):

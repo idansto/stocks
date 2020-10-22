@@ -18,6 +18,23 @@ def get_global_name():
     pass
 
 
+glboal_metric_map = {1: '10 Year Treasury Rate', 2: 'Federal Funds Rate'}
+reverse_glboal_metric_map = {v: k for k, v in glboal_metric_map.items()}
 
+
+def get_global_metric_name(global_metric_id):
+    return glboal_metric_map[global_metric_id]
+
+
+def get_global_metric_names(company_attribute_ids):
+    return list(map(get_global_metric_name, company_attribute_ids))
+
+
+def get_global_metric_id(global_metric_name):
+    return reverse_glboal_metric_map[global_metric_name]
+
+
+def get_global_metric_ids(global_metric_names):
+    return list(map(get_global_metric_id, global_metric_names))
 
 

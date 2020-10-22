@@ -7,10 +7,11 @@ from tqdm import tqdm
 
 from databuilder.bl import MarketCapBuilderBL
 from sampler.dao import TickersPricesDAO
-from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names
+from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names, get_companies_ids
 from sampler.dao.ComapnyMetricsDAO import get_company_metrics_names
+from sampler.dao.GlobalMetricDAO import get_global_metric_names
 from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_list_with_all
-from utils import DictUtils
+from utils import DictUtils, DateUtils
 from utils.Colors import color
 from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
 from utils.TimerDecorator import timeit
@@ -18,10 +19,10 @@ from collections import defaultdict
 
 
 def choose_companies():
-    companies_ids = range(1, 10)
+    companies_ids = range(1, 201)
     # companies_ids = [3]
     companies_tickers = get_tickers(companies_ids)
-    # companies_tickers = ["AVGO","MSFT"]
+    # companies_tickers = ["LLY","TMO"]
     # companies_ids = get_companies_ids(companies_tickers)
     # companies_ids = [1, 2, 3, 4, 5, 6, 10]
     print(f"Chosen {len(companies_tickers)} companies which are: {companies_tickers}")
@@ -29,33 +30,41 @@ def choose_companies():
 
 
 def choose_dates():
-    start_date = "2019-09-30"
+    start_date = "2014-09-30"
     end_date = "2020-09-30"
     date_str_list = get_quraterly_dates_between(start_date, end_date)
     print(f"Dates are: {len(date_str_list)} dates: ({start_date} -- {end_date})")
+    # date_str_list = ['2020-03-31', '2020-06-30']
     return date_str_list
 
 
 def choose_company_metrics():
-    company_metrics_ids = [1, 4, 5, 2, 3, 7]
-    # company_metrics_ids = [1, 3, 7, 8, 10, 11, 12, 19, 20, 21, 22]
+    # company_metrics_ids = [1, 4, 5, 2, 3, 7]
+    # company_metrics_ids = list(range(23, 23+6))
+    company_metrics_ids = [1, 3, 7, 12, 16, 19]
     # company_metrics_ids = [4, 5]
+    company_metrics_names = get_company_metrics_names(company_metrics_ids)
 
-    print(f"{len(company_metrics_ids)} companies_metrics names are: {get_company_metrics_names(company_metrics_ids)}\n")
+    print(f"{len(company_metrics_ids)} companies_metrics names are: {company_metrics_names}")
 
-    features_names = get_company_metrics_names(company_metrics_ids)
-    return company_metrics_ids, features_names
+    return company_metrics_ids, company_metrics_names
 
 
 def choose_company_attributes():
-    company_attributes_ids = [1]
+    company_attributes_ids = []
     company_attributes_names = get_company_attribute_names(company_attributes_ids)
+
+    print(f"{len(company_attributes_names)} companies attributes names are: {company_attributes_names}")
+
     return company_attributes_ids, company_attributes_names
 
 
 def choose_global_metrics():
-    global_metrics_ids = [1]
-    global_metrics_names = get_company_metrics_names(global_metrics_ids)  # todo: make func
+    global_metrics_ids = [1,2]
+    global_metrics_names = get_global_metric_names(global_metrics_ids)  # todo: make func
+
+    print(f"{len(global_metrics_names)} global metrics names are: {global_metrics_names}")
+
     return global_metrics_ids, global_metrics_names
 
 
@@ -66,29 +75,32 @@ class Sampler:
         # choose companies, dates and features
         companies_ids, companies_tickers = choose_companies()
         date_str_list = choose_dates()
-        company_metrics_ids, company_metrics_names = choose_company_metrics()
-        company_attributes_ids, company_attributes_names = choose_company_attributes()
         global_metrics_ids, global_metrics_names = choose_global_metrics()
+        company_attributes_ids, company_attributes_names = choose_company_attributes()
+        company_metrics_ids, company_metrics_names = choose_company_metrics()
+
+        sample_field_names = global_metrics_names + company_attributes_names + company_metrics_names
+        print(f"sample fields: {sample_field_names}")
 
         # get samples from DB
         raw_samples = get_samples_list_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
 
-        # get responses from macrotrends
+        # get responses from macrotrends (market cap)
         macrotrends_responses = get_macrotrends_responses(companies_ids, date_str_list)
 
-        # get responses from Yahoo
-        yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
+        # # get responses from Yahoo
+        # yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
 
-        # insert new data into DB
-        insert_data_into_db(yahoo_responses)
+        # # insert new data into DB
+        # insert_data_into_db(yahoo_responses)
 
         # build X and y
-        X, y, sample_names = build_X_and_y_macrotrends(raw_samples, macrotrends_responses, company_metrics_names)
+        X, y, sample_names = build_X_and_y_macrotrends(raw_samples, macrotrends_responses, sample_field_names)
         # X, y, sample_names = build_X_and_y(raw_samples, yahoo_responses, company_metrics_names)
 
         # create DataFrame for X and y (samples and results)
-        all_features_name = global_metrics_names + company_attributes_names + company_metrics_names
-        X_df, y_df = build_data_frames(X, all_features_name, sample_names, y)
+        all_sample_fields_name = global_metrics_names + company_attributes_names + company_metrics_names
+        X_df, y_df = build_data_frames(X, all_sample_fields_name, sample_names, y)
 
         return X_df, y_df
 
@@ -100,7 +112,7 @@ def is_valid_sample(raw_sample, features_names):
     index = 0
     is_valid = True
     for element in raw_sample.sample:
-        if not element:
+        if not element or math.isnan(element) or element<0:
             current_feature_name = features_names[index]
             stat_of_non_valid_features[current_feature_name] += 1
             is_valid = False
@@ -116,18 +128,21 @@ def get_macrotrends_responses(companies_ids, date_str_list):
     dateticker_to_capprice_map = {}
     ticker_list = get_tickers(companies_ids)
     for date_str in tqdm(date_str_list, desc="looping over all given quarters", colour="CYAN"):
-        date = str_to_date(date_str)
         for ticker in ticker_list:
             market_cap = get_market_cap(date_str, ticker)
-            dateticker_to_capprice_map[(date,ticker)] = market_cap
+            dateticker_to_capprice_map[(date_str,ticker)] = market_cap
     return dateticker_to_capprice_map
 
 
 def get_market_cap(date_str, ticker):
     market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
-    if not market_cap:
-        MarketCapBuilderBL.populate_single_ticker(ticker)
-        market_cap = TickersPricesDAO.get_market_cap()
+    if market_cap is None:
+        # check if date is out of range
+        last_date = TickersPricesDAO.get_ticker_last_date(ticker)
+        if DateUtils.is_after(date_str, last_date):
+            print(f"failed to find info for {ticker} and {date_str}. retrieving from macrotrends")
+            MarketCapBuilderBL.populate_single_ticker(ticker=ticker)
+            market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
     return market_cap
 
 
@@ -194,8 +209,8 @@ def insert_data_into_db(single_date_map):
 
 
 def is_valid_response(response):
-    return response > 0
-    # return response is not None and not math.isnan(response) and not response<0
+    # return response > 0
+    return response is not None and not math.isnan(response) and response > 0
 
 
 def get_response_from_yahoo_or_db(yahoo_responses, ticker, date_obj: datetime.date):
@@ -233,14 +248,15 @@ def build_X_and_y_macrotrends(raw_samples, macrotrends_responses, features_names
     y = []
     sample_names = []
 
-    for i in range(len(raw_samples)):
-        raw_sample = raw_samples[i]
-        response = macrotrends_responses[i]
-        feature_name = features_names[i]
-        if is_valid_sample(raw_sample, feature_name) and is_valid_response(response):
-            X.append(raw_sample.sample)
-            y.append(response)
-            sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+    for raw_sample in tqdm(raw_samples, desc='creating X and y from raw samples', colour="CYAN"):
+        if is_valid_sample(raw_sample, features_names):
+            response = macrotrends_responses[(raw_sample.date_obj, raw_sample.ticker)]
+            if is_valid_response(response):
+                X.append(raw_sample.sample)
+                y.append(response)
+                sample_names.append(f"{raw_sample.ticker}({raw_sample.date_obj})")
+            else:
+                print(f"not valid response ({response}) for {raw_sample.date_obj}-{raw_sample.ticker}")
 
     size_of_valid_samples = len(sample_names)
     size_of_raw_samples = len(raw_samples)

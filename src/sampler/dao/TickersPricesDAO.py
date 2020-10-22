@@ -1,4 +1,5 @@
 from utils.SqlUtils import get_connection_cursor
+from utils.TimerDecorator import timeit
 
 
 def get_closing_price(date, ticker):
@@ -12,11 +13,16 @@ def get_closing_price(date, ticker):
 
 def get_market_cap(date, ticker):
     connection, cursor = get_connection_cursor()
-    sql = f"select t.market_cap from shares.tickers_prices t where t.date = '{date}' and t.ticker = '{ticker}'"
+    sql = f"select t.market_cap from shares.tickers_prices t where t.ticker = '{ticker}' and t.date >= '{date}' and t.date < date_add('{date}',INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1;"
+
     # print(f"sql is: {sql}")
     cursor.execute(sql)
-    (market_cap,) = cursor.fetchone()
-    return market_cap
+    single_result = cursor.fetchone()
+    if single_result:
+        (market_cap,) = single_result
+        return market_cap
+    else:
+        return None
 
 
 def insert_closing_price(ticker, date_obj, closing_price):
@@ -47,3 +53,23 @@ def create_ticker_list_table_sql(ticker_list):
 
 def add_select_as_date(ticker):
     return "select '{}' as ticker".format(ticker)
+
+
+def get_ticker_range(ticker):
+    connection, cursor = get_connection_cursor()
+    start_date = get_ticker_first_date(ticker)
+    sql = f"select t.date from shares.tickers_prices t where t.ticker ='{ticker}' ORDER BY date DESC LIMIT 1"
+    cursor.execute(sql)
+    (end_date,) = cursor.fetchone()
+    return start_date,end_date
+
+
+def get_ticker_first_date(ticker, connection=None, cursor=None):
+    if not connection:
+        connection, cursor = get_connection_cursor()
+
+    sql = f"select t.date from shares.tickers_prices t where t.ticker ='{ticker}' ORDER BY date ASC LIMIT 1"
+    # print(f"sql is: {sql}")
+    cursor.execute(sql)
+    (start_date,) = cursor.fetchone()
+    return start_date

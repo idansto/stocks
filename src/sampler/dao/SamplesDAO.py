@@ -1,4 +1,4 @@
-from sampler.dao.CompaniesDAO import abs_features_map
+from sampler.dao.CompaniesDAO import company_attributes_map
 from src.sampler.dto.RawSample import RawSample
 from src.utils.SqlUtils import get_connection_cursor
 from tqdm import tqdm
@@ -12,7 +12,7 @@ TICKER = 1
 DATE = 2
 SAMPLE_START = 3
 
-
+@timeit(message=None)
 def get_samples_list_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids):
     connection, cursor = get_connection_cursor()
     sql = getSamplesSql_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
@@ -88,18 +88,29 @@ def id_to_key_id(id, key):
     return f"t.{key}{id}"
 
 
-def getSamplesSql_with_all(company_ids, date_list, global_features_ids, abs_features_ids, features_ids):
+def getSamplesSql_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids):
     companies = create_companies(company_ids)
     dates = create_dates_table(date_list)
-    small_global_features = create_small_global_features_select_list(global_features_ids)
-    global_features = create_golbal_features_select_list(global_features_ids)
-    t_abs_features = create_abs_features(abs_features_ids, 't')
-    c_abs_features = create_abs_features(abs_features_ids, 'c')
-    features = create_features_select_list(features_ids)
-    small_features = create_small_features_select_list(features_ids)
-    first_feature = id_to_feature_id(features_ids[0])
-    sql = f"select t.id, t.ticker, t.date, {small_global_features}, {t_abs_features}, {small_features} from " \
-          f"(SELECT c.id, c.ticker, {global_features}, {c_abs_features}, dates.date, {features} from shares.companies c, " \
+
+    if len(global_metrics_ids) > 0:
+        small_global_metrics = create_small_global_features_select_list(global_metrics_ids) + ', '
+        global_metrics = create_golbal_features_select_list(global_metrics_ids) + ', '
+    else:
+        small_global_metrics = ''
+        global_metrics = ''
+
+    if len(company_attributes_ids) > 0:
+        t_company_attributes = create_abs_features(company_attributes_ids, 't') + ', '
+        c_company_attributes = create_abs_features(company_attributes_ids, 'c') + ', '
+    else:
+        t_company_attributes = ''
+        c_company_attributes = ''
+
+    sql_company_metrics_ids = create_features_select_list(company_metrics_ids)
+    small_features = create_small_features_select_list(company_metrics_ids)
+    first_feature = id_to_feature_id(company_metrics_ids[0])
+    sql = f"select t.id, t.ticker, t.date, {small_global_metrics} {t_company_attributes} {small_features} from " \
+          f"(SELECT c.id, c.ticker, {global_metrics} {c_company_attributes} dates.date, {sql_company_metrics_ids} from shares.companies c, " \
           f"({dates}) as dates where c.id in ({companies})) as t where {first_feature} is not null;"
     return sql
 
@@ -143,7 +154,7 @@ def create_abs_features(abs_features_ids, char):
 # IFNULL(t.feature2,0) as feature2
 def create_abs_feature(abs_feature_id, char):
     # return f"IFNULL({char}.{abs_features_map[abs_feature_id]}, 0) as {abs_features_map[abs_feature_id]}"
-    return f"{char}.{abs_features_map[abs_feature_id]}"
+    return f"{char}.{company_attributes_map[abs_feature_id]}"
 
 
 def add_select_as_date(date):
