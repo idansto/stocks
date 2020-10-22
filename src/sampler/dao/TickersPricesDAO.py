@@ -57,10 +57,8 @@ def add_select_as_date(ticker):
 
 def get_ticker_range(ticker):
     connection, cursor = get_connection_cursor()
-    start_date = get_ticker_first_date(ticker)
-    sql = f"select t.date from shares.tickers_prices t where t.ticker ='{ticker}' ORDER BY date DESC LIMIT 1"
-    cursor.execute(sql)
-    (end_date,) = cursor.fetchone()
+    start_date = get_ticker_first_date(ticker, connection, cursor)
+    end_date = get_ticker_last_date(ticker, connection, cursor)
     return start_date,end_date
 
 
@@ -73,3 +71,14 @@ def get_ticker_first_date(ticker, connection=None, cursor=None):
     cursor.execute(sql)
     (start_date,) = cursor.fetchone()
     return start_date
+
+
+def get_ticker_last_date(ticker, connection=None, cursor=None):
+    if not connection:
+        connection, cursor = get_connection_cursor()
+
+    sql = f"select t.date from shares.tickers_prices t where t.ticker ='{ticker}' ORDER BY date DESC LIMIT 1"
+    # print(f"sql is: {sql}")
+    cursor.execute(sql)
+    (last_date,) = cursor.fetchone()
+    return last_date
