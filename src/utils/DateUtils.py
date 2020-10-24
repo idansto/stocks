@@ -71,6 +71,7 @@ def is_before(date_str, start):
     return date < start
 
 
-def is_after(date_str, last_date):
+def is_after(date_str, last_date_str):
     date = str_to_date(date_str)
+    last_date = str_to_date(last_date_str)
     return date > last_date

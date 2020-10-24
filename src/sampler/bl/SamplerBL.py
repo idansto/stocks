@@ -6,7 +6,7 @@ import yfinance as yf
 from tqdm import tqdm
 
 from databuilder.bl import MarketCapBuilderBL
-from sampler.dao import TickersPricesDAO
+from sampler.dao import TickersPricesDAO, LastUpdatedDAO
 from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names, get_companies_ids
 from sampler.dao.ComapnyMetricsDAO import get_company_metrics_names
 from sampler.dao.GlobalMetricDAO import get_global_metric_names
@@ -127,7 +127,7 @@ def is_valid_sample(raw_sample, features_names):
 def get_macrotrends_responses(companies_ids, date_str_list):
     dateticker_to_capprice_map = {}
     ticker_list = get_tickers(companies_ids)
-    for date_str in tqdm(date_str_list, desc="looping over all given quarters", colour="CYAN"):
+    for date_str in tqdm(date_str_list, desc="looping over all given quarters to get macrotrends responses", colour="CYAN"):
         for ticker in ticker_list:
             market_cap = get_market_cap(date_str, ticker)
             dateticker_to_capprice_map[(date_str,ticker)] = market_cap
@@ -137,10 +137,10 @@ def get_macrotrends_responses(companies_ids, date_str_list):
 def get_market_cap(date_str, ticker):
     market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
     if market_cap is None:
-        # check if date is out of range
-        last_date = TickersPricesDAO.get_ticker_last_date(ticker)
-        if DateUtils.is_after(date_str, last_date):
-            print(f"failed to find info for {ticker} and {date_str}. retrieving from macrotrends")
+        # get last_update
+        last_updated = LastUpdatedDAO.get_last_updated("market_cap")
+        if DateUtils.is_after(date_str, last_updated):
+            print(f"market cap value for {ticker} and {date_str} is not up to date. retrieving from macrotrends")
             MarketCapBuilderBL.populate_single_ticker(ticker=ticker)
             market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
     return market_cap

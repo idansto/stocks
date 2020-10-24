@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime
 from urllib.request import urlopen
 from typing import Optional, Any
 
@@ -48,6 +49,9 @@ def populate_single_ticker(connection=None, cursor=None, ticker=None):
         sql = f"INSERT INTO shares.tickers_prices (date, ticker, market_cap) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap)"
         cursor.executemany(sql, my_data)
         print(f"there are {len(json)} dates for {ticker}")
+        sql = f"INSERT INTO shares.last_updated (data_name, date) VALUES (%s, %s) ON DUPLICATE KEY UPDATE market_cap=VALUES(date)"
+        values = ["market_cap", datetime.today()]
+        cursor.execute(sql,values)
         connection.commit()
         print("committed")
 
