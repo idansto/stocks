@@ -12,10 +12,12 @@ TICKER = 1
 DATE = 2
 SAMPLE_START = 3
 
+
 @timeit(message=None)
 def get_samples_list_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids):
     connection, cursor = get_connection_cursor()
-    sql = getSamplesSql_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
+    sql = getSamplesSql_with_all(company_ids, date_list, global_metrics_ids, company_attributes_ids,
+                                 company_metrics_ids)
     print(sql)
     cursor.execute(sql)
 
@@ -47,6 +49,7 @@ def get_samples_with_abs_features(company_ids, date_list, abs_features_ids, feat
         sample_wrapper = RawSample(company_id, ticker, date, sample)
         sample_wrapper_list.append(sample_wrapper)
     return sample_wrapper_list
+
 
 @timeit(message=None)
 def get_samples(company_ids, date_list, features_ids):
@@ -111,7 +114,7 @@ def getSamplesSql_with_all(company_ids, date_list, global_metrics_ids, company_a
     first_feature = id_to_feature_id(company_metrics_ids[0])
     sql = f"select t.id, t.ticker, t.date, {small_global_metrics} {t_company_attributes} {small_features} from " \
           f"(SELECT c.id, c.ticker, {global_metrics} {c_company_attributes} dates.date, {sql_company_metrics_ids} from shares.companies c, " \
-          f"({dates}) as dates where c.id in ({companies})) as t where {first_feature} is not null;"
+          f"({dates}) as dates where c.id in ({companies})) as t where {first_feature} is not null ORDER by date ASC;"
     return sql
 
 
@@ -151,6 +154,7 @@ def create_abs_features(abs_features_ids, char):
     list_of_abs_features = map(functools.partial(create_abs_feature, char=char), abs_features_ids)
     return ',\n'.join(list_of_abs_features)
 
+
 # IFNULL(t.feature2,0) as feature2
 def create_abs_feature(abs_feature_id, char):
     # return f"IFNULL({char}.{abs_features_map[abs_feature_id]}, 0) as {abs_features_map[abs_feature_id]}"
@@ -183,5 +187,5 @@ def create_golbal_features_select_list(global_features_ids):
 
 def create_global_feature(global_feature_id):
     return f"(select g.global_metric_value from shares.global_data g where g.global_metric_id = " \
-            f"{global_feature_id} and g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) " \
-            f"ORDER BY date ASC LIMIT 1) as global_feature{global_feature_id}"
+           f"{global_feature_id} and g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) " \
+           f"ORDER BY date ASC LIMIT 1) as global_feature{global_feature_id}"

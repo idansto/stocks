@@ -72,10 +72,11 @@ class StocksLearner:
         return result.mean(), result
 
     def preproccess_data(self, X, y):
-        categorial_columns = ["exchange"]
         # X = pd.get_dummies(X, columns=categorial_columns)
         X2 = np.log(X)
         y2 = np.log(y)
+        # X2 = X
+        # y2 = y
 
         # sc = StandardScaler()
         # sc.fit(X)

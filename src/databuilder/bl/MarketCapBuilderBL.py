@@ -46,12 +46,14 @@ def populate_single_ticker(connection=None, cursor=None, ticker=None):
             t = (date, ticker, market_cap)
             my_data.append(t)
 
+        print(f"there are {len(json)} dates for {ticker}")
         sql = f"INSERT INTO shares.tickers_prices (date, ticker, market_cap) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE market_cap=VALUES(market_cap)"
         cursor.executemany(sql, my_data)
-        print(f"there are {len(json)} dates for {ticker}")
-        sql = f"INSERT INTO shares.last_updated (data_name, date) VALUES (%s, %s) ON DUPLICATE KEY UPDATE market_cap=VALUES(date)"
-        values = ["market_cap", datetime.today()]
+
+        sql = f"INSERT INTO shares.last_updated (data_name, ticker, date) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE date=VALUES(date)"
+        values = ['market_cap', ticker, datetime.today()]
         cursor.execute(sql,values)
+
         connection.commit()
         print("committed")
 

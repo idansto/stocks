@@ -1,3 +1,4 @@
+from utils import DateUtils
 from utils.SqlUtils import get_connection_cursor
 from utils.TimerDecorator import timeit
 
@@ -23,6 +24,32 @@ def get_market_cap(date, ticker):
         return market_cap
     else:
         return None
+
+
+
+
+def get_market_cap_for_list_of_dates(ticker, list_of_dates, connection=None, cursor=None):
+    if not connection:
+        connection, cursor = get_connection_cursor()
+
+    # (select 1 id, '2019-3-31' date union all select 2 id, '2019-6-30' date)
+    original_dates_sql = create_dates_sql(list_of_dates)
+    list_of_business_dates = DateUtils.get_business_dates(list_of_dates)
+    business_dates_sql = create_dates_sql(list_of_business_dates)
+
+    sql = f"select dates.date original_date, t.date business_day, t.market_cap from {original_dates_sql} as dates, {business_dates_sql} as business_dates, shares.tickers_prices t where t.ticker = '{ticker}' AND dates.id=business_dates.id AND t.date = business_dates.date;"
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+
+def create_dates_sql(list_of_dates):
+    ' union all '.join(map(create_signle_date, enumerate(list_of_dates)))
+
+
+def create_signle_date(enumurated_data):
+    (id, date) = enumurated_data
+    return "select {id} id, '{date}' date"
+
 
 
 def insert_closing_price(ticker, date_obj, closing_price):
@@ -82,3 +109,5 @@ def get_ticker_last_date(ticker, connection=None, cursor=None):
     cursor.execute(sql)
     (last_date,) = cursor.fetchone()
     return last_date
+
+

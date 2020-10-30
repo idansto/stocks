@@ -12,17 +12,29 @@ def is_date(key):
     # print(key, pattern, result)
     return result
 
+
 @lru_cache(maxsize=1000)
 def str_to_date(date_str):
     return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+
 
 @lru_cache(maxsize=1000)
 def next_business_day(date_obj: datetime.date):
     nyse = mcal.get_calendar('NYSE')
     end_date = date_obj + datetime.timedelta(days=5)
     first_business_date_str = nyse.valid_days(start_date=date_obj, end_date=end_date)[0]
-    busienss_day = first_business_date_str.to_pydatetime().date()
-    return busienss_day
+    business_day = first_business_date_str.to_pydatetime().date()
+    return business_day
+
+
+@lru_cache(maxsize=1000)
+def get_business_dates(list_of_dates):
+    return map(get_business_date, list_of_dates)
+
+
+def get_business_date(date_str):
+    date = str_to_date(date_str)
+    return next_business_day(date)
 
 
 def next_quarter_date_after(date):
@@ -38,7 +50,8 @@ def next_quarter_date_after(date):
     if month == 9:
         return f"{year}-12-31"
     if month == 12:
-        return f"{year+1}-03-31"
+        return f"{year + 1}-03-31"
+
 
 def get_quraterly_dates_between(start_date_str, end_date_str):  # TODO
 
@@ -71,7 +84,8 @@ def is_before(date_str, start):
     return date < start
 
 
-def is_after(date_str, last_date_str):
+def is_after(date_str, last_date):
+    if last_date is None:
+        return True
     date = str_to_date(date_str)
-    last_date = str_to_date(last_date_str)
     return date > last_date

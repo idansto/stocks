@@ -138,12 +138,24 @@ def get_market_cap(date_str, ticker):
     market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
     if market_cap is None:
         # get last_update
-        last_updated = LastUpdatedDAO.get_last_updated("market_cap")
+        last_updated = LastUpdatedDAO.get_last_updated("market_cap", ticker)
         if DateUtils.is_after(date_str, last_updated):
             print(f"market cap value for {ticker} and {date_str} is not up to date. retrieving from macrotrends")
             MarketCapBuilderBL.populate_single_ticker(ticker=ticker)
             market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
     return market_cap
+
+
+def get_market_cap_for_list_of_dates(ticker, list_of_dates):
+    date_marketcap_map = TickersPricesDAO.get_market_cap_for_list_of_dates(ticker, list_of_dates)
+    if len(date_marketcap_map) < len(list_of_dates):
+        # get last_update
+        last_updated = LastUpdatedDAO.get_last_updated("market_cap", ticker)
+        if DateUtils.is_after(list_of_dates[-1], last_updated):
+            print(f"market cap value for {ticker} is not up to date. retrieving from macrotrends")
+            MarketCapBuilderBL.populate_single_ticker(ticker=ticker)
+            market_cap = TickersPricesDAO.get_market_cap_for_list_of_dates(ticker, list_of_dates)
+    return date_marketcap_map
 
 
 @timeit(message=None)
