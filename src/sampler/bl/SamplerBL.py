@@ -124,6 +124,7 @@ def is_valid_sample(raw_sample, features_names):
     return is_valid
 
 
+@timeit(message=None)
 def get_macrotrends_responses(companies_ids, date_str_list):
     dateticker_to_capprice_map = {}
     ticker_list = get_tickers(companies_ids)
