@@ -1,4 +1,4 @@
-from utils import DateUtils
+from utils import DateUtils, StrUtils
 from utils.SqlUtils import get_connection_cursor
 from utils.TimerDecorator import timeit
 
@@ -14,7 +14,8 @@ def get_closing_price(date, ticker):
 
 def get_market_cap(date, ticker):
     connection, cursor = get_connection_cursor()
-    sql = f"select t.market_cap from shares.tickers_prices t where t.ticker = '{ticker}' and t.date >= '{date}' and t.date < date_add('{date}',INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1;"
+    sql = f"select t.market_cap from shares.tickers_prices t where t.ticker = '{ticker}' and t.date >= '{date}' and " \
+          f"t.date < date_add('{date}',INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1;"
 
     # print(f"sql is: {sql}")
     cursor.execute(sql)
@@ -25,6 +26,18 @@ def get_market_cap(date, ticker):
     else:
         return None
 
+
+def get_market_cap_list(business_day, tickers):
+    connection, cursor = get_connection_cursor()
+    tickers_list = StrUtils.create_comma_sperated_list(tickers)
+    sql = f"select t.date, t.ticker, t.market_cap from shares.tickers_prices t where t.ticker in ({tickers_list})' and t.date = '{business_day}';"
+    print(f"sql is: {sql}")
+    cursor.execute(sql)
+    dateticker_to_capprice_map = {}
+    for row in cursor:
+        (date, ticker, market_cap) = row
+        dateticker_to_capprice_map[(date, ticker)] = market_cap
+    return dateticker_to_capprice_map
 
 
 

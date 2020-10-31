@@ -13,7 +13,7 @@ from sampler.dao.GlobalMetricDAO import get_global_metric_names
 from src.sampler.dao.SamplesDAO import get_samples, get_samples_with_abs_features, get_samples_list_with_all
 from utils import DictUtils, DateUtils
 from utils.Colors import color
-from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date
+from utils.DateUtils import get_quraterly_dates_between, next_business_day, str_to_date, get_business_date
 from utils.TimerDecorator import timeit
 from collections import defaultdict
 
@@ -125,6 +125,26 @@ def is_valid_sample(raw_sample, features_names):
 
 
 @timeit(message=None)
+def get_macrotrends_responses_method_b(companies_ids, date_str_list):
+    dateticker_to_capprice_map = {}
+    ticker_list = get_tickers(companies_ids)
+    for date_str in tqdm(date_str_list, desc="looping over all given quarters to get macrotrends responses", colour="CYAN"):
+        business_day = get_business_date(date_str)
+        dateticker_to_capprice_map_for_business_day = get_market_cap_for_business_day(business_day, ticker_list)
+        for ((date, ticker), market_cap) in dateticker_to_capprice_map_for_business_day.items():
+            if market_cap is None:
+                # get last_update
+                last_updated = LastUpdatedDAO.get_last_updated("market_cap", ticker)
+                if DateUtils.is_after(date_str, last_updated):
+                    print(
+                        f"market cap value for {ticker} and {date_str} is not up to date. retrieving from macrotrends")
+                    MarketCapBuilderBL.populate_single_ticker(ticker=ticker)
+                    market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)
+            dateticker_to_capprice_map[(date_str,ticker)] = market_cap
+    return dateticker_to_capprice_map
+
+
+@timeit(message=None)
 def get_macrotrends_responses(companies_ids, date_str_list):
     dateticker_to_capprice_map = {}
     ticker_list = get_tickers(companies_ids)
@@ -134,6 +154,9 @@ def get_macrotrends_responses(companies_ids, date_str_list):
             dateticker_to_capprice_map[(date_str,ticker)] = market_cap
     return dateticker_to_capprice_map
 
+
+def get_market_cap_for_business_day(business_day, tickers):
+    TickersPricesDAO.get_market_cap_list(business_day, tickers)
 
 def get_market_cap(date_str, ticker):
     market_cap = TickersPricesDAO.get_market_cap(date_str, ticker)

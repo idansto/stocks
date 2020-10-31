@@ -1,7 +1,7 @@
 import unittest
 
-from sampler.dao.SamplesDAO import create_dates_table, create_features_select_list, create_companies, \
-    create_small_features_select_list, get_samples_sql, get_samples, get_samples_with_abs_features, get_samples_list_with_all
+from sampler.dao.SamplesDAO import create_dates_table, create_features_select_list, create_small_features_select_list, get_samples_sql, get_samples, get_samples_with_abs_features, get_samples_list_with_all
+from utils.StrUtils import create_comma_sperated_list
 
 
 class TestSamplesDAO(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestSamplesDAO(unittest.TestCase):
                                    "dates.date and d.feature_id = 3) as feature3")
 
     def test_create_companies(self):
-        companies = create_companies([1,2,3])
+        companies = create_comma_sperated_list([1, 2, 3])
         self.assertEqual(companies, "1,2,3")
         print(companies)
 
