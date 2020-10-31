@@ -86,7 +86,8 @@ class Sampler:
         raw_samples = get_samples_list_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
 
         # get responses from macrotrends (market cap)
-        macrotrends_responses = get_macrotrends_responses(companies_ids, date_str_list)
+        # macrotrends_responses = get_macrotrends_responses(companies_ids, date_str_list)
+        macrotrends_responses = get_macrotrends_responses_method_b(companies_ids, date_str_list)
 
         # # get responses from Yahoo
         # yahoo_responses = get_yahoo_responses(companies_ids, date_str_list)
@@ -127,11 +128,12 @@ def is_valid_sample(raw_sample, features_names):
 @timeit(message=None)
 def get_macrotrends_responses_method_b(companies_ids, date_str_list):
     dateticker_to_capprice_map = {}
-    ticker_list = get_tickers(companies_ids)
-    for date_str in tqdm(date_str_list, desc="looping over all given quarters to get macrotrends responses", colour="CYAN"):
+    for date_str in tqdm(date_str_list, desc="looping over all given dates to get macrotrends responses", colour="CYAN"):
+        ticker_list = get_tickers(companies_ids)
         business_day = get_business_date(date_str)
-        dateticker_to_capprice_map_for_business_day = get_market_cap_for_business_day(business_day, ticker_list)
-        for ((date, ticker), market_cap) in dateticker_to_capprice_map_for_business_day.items():
+        dateticker_to_capprice_map_for_business_day = TickersPricesDAO.get_market_cap_list(date_str, business_day, ticker_list)
+        for ticker in ticker_list:
+            market_cap = dateticker_to_capprice_map_for_business_day.get((date_str, ticker))
             if market_cap is None:
                 # get last_update
                 last_updated = LastUpdatedDAO.get_last_updated("market_cap", ticker)

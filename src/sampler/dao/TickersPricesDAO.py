@@ -27,16 +27,16 @@ def get_market_cap(date, ticker):
         return None
 
 
-def get_market_cap_list(business_day, tickers):
+def get_market_cap_list(date_str, business_day, tickers):
     connection, cursor = get_connection_cursor()
-    tickers_list = StrUtils.create_comma_sperated_list(tickers)
-    sql = f"select t.date, t.ticker, t.market_cap from shares.tickers_prices t where t.ticker in ({tickers_list})' and t.date = '{business_day}';"
+    tickers_list = StrUtils.create_comma_sperated__quoated_list(tickers)
+    sql = f"select t.date, t.ticker, t.market_cap from shares.tickers_prices t where t.ticker in ({tickers_list}) and t.date = '{business_day}';"
     print(f"sql is: {sql}")
     cursor.execute(sql)
     dateticker_to_capprice_map = {}
     for row in cursor:
         (date, ticker, market_cap) = row
-        dateticker_to_capprice_map[(date, ticker)] = market_cap
+        dateticker_to_capprice_map[(date_str, ticker)] = market_cap
     return dateticker_to_capprice_map
 
 
