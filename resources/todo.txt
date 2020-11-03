@@ -1,4 +1,18 @@
 
+
+3-11-2020
+test that getting scores in both method return the same result
+try to use business dates for sampling building as well
+check odd values for some shares
+provide solution for logarithm issue
+change tables names
+show sql to Avi and ask for better solution
+ask Chaim what should I use?
+
+
+
+
+
 Builders
     add more info to DB, such as Key Financial Ratios
 

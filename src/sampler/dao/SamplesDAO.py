@@ -14,12 +14,14 @@ DATE = 2
 SAMPLE_START = 3
 
 
-# select t.id, t.ticker, t.date, t.global_feature1, t.global_feature2,
-# t.feature1, t.feature3, t.feature7, t.feature12, t.feature16, t.feature19 from
-# (SELECT c.id, c.ticker, (select g.global_metric_value from shares.global_data g where g.global_metric_id = 1 and
+# select t.id, t.ticker, t.date,
+# t.global_feature1, t.global_feature2, t.feature1, t.feature3, t.feature7, t.feature12, t.feature16, t.feature19 from
+# (SELECT c.id, c.ticker,
+# (select g.global_metric_value from shares.global_data g where g.global_metric_id = 1 and
 # g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1) as global_feature1,
 # (select g.global_metric_value from shares.global_data g where g.global_metric_id = 2 and
-# g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1) as global_feature2,   dates.date,
+# g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1) as global_feature2,
+# dates.date,
 # (select d.value from shares.feature_data d where d.company_id = c.id and d.date = dates.date and d.feature_id = 1) as feature1,
 # (select d.value from shares.feature_data d where d.company_id = c.id and d.date = dates.date and d.feature_id = 3) as feature3,
 # (select d.value from shares.feature_data d where d.company_id = c.id and d.date = dates.date and d.feature_id = 7) as feature7,
