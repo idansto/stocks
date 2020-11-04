@@ -3,6 +3,7 @@
 3-11-2020
 test that getting scores in both method return the same result - fixed issue
 try to use business dates for sampling building as well - saved a lot of time
+how come we do not have result for general features
 check odd values for some shares
 provide solution for logarithm issue
 change tables names

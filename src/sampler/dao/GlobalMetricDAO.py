@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from utils.SqlUtils import get_connection_cursor
 
 
@@ -37,4 +39,13 @@ def get_global_metric_id(global_metric_name):
 def get_global_metric_ids(global_metric_names):
     return list(map(get_global_metric_id, global_metric_names))
 
+
+@lru_cache(maxsize=1000)
+def get_global_metric_id(code):
+    connection, cursor = get_connection_cursor()
+    sql = 'select g.id from shares.global_data g where g.code =%s'
+    values = [code]
+    cursor.execute(sql, values)
+    (id, ) = cursor.fetchone()
+    return id
 

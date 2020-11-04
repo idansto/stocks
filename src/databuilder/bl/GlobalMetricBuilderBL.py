@@ -1,6 +1,9 @@
+import json
+import re
 from csv import reader
 from urllib.request import urlopen
 
+from sampler.dao import GlobalMetricDAO
 from sampler.dao.GlobalMetricDAO import get_max_date_for_metric_id
 from utils.DateUtils import str_to_date
 from utils.SqlUtils import get_connection_cursor
@@ -65,6 +68,63 @@ def get_date_value_line(line):
     size_of_line = len(splitted_line)
     if size_of_line == 2:
         return splitted_line
+
+
+def populate_10_Year_Treasury_Rate():
+    populate_general_metric_data_from_macrotrends(2016)
+
+
+def populate_general_metric_data_from_macrotrends(chart_id):
+    connection, cursor = get_connection_cursor()
+    json_obj = get_json_from_macrotrends(chart_id)
+    if (json_obj):
+        my_data = []
+        for dic in json_obj:
+            for key in dic:
+                if key == 'date':
+                    date = dic[key]
+                else:
+                    metric_id = GlobalMetricDAO.get_global_metric_id(key)
+                    value = dic[key]
+                    tuple = (date, metric_id, value)
+                    my_data.append(tuple)
+
+        sql = f"INSERT INTO shares.global_data (date, metric_id, value) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE value=VALUES(value)"
+        cursor.executemany(sql, my_data)
+
+
+def get_json_from_macrotrends(chart_id):
+    json_str = get_global_metrics_text_from_macrotrends(chart_id)
+    if json_str:
+        return json.loads(json_str)
+    return None
+
+
+# https://www.macrotrends.net/assets/php/chart_iframe_comp.php?id=2016
+def get_global_metrics_text_from_macrotrends(chart_id):
+    url = f"https://www.macrotrends.net/assets/php/chart_iframe_comp.php?id={chart_id}"
+    print(f'url = {url}')
+    try:
+        connection = urlopen(url)
+        html = connection.read()
+        # print(f'html = {html}')
+        text = getString(html)
+        return extract_original_data(text)
+    except:
+        print(f'failed to read url: {url}')
+        return None
+
+originalData_pattern = re.compile('var originalData = (.+);\\s*var chart =')
+
+def extract_original_data(text: object) -> object:
+    match = originalData_pattern.search(text)
+    if match:
+        found = match.group(1)
+        return found
+    else:
+        print('not found')
+        return None
+
 
 
 ################################################################################################
