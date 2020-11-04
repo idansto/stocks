@@ -60,8 +60,8 @@ def choose_company_attributes():
 
 
 def choose_global_metrics():
-    global_metrics_ids = [1,2]
-    global_metrics_names = get_global_metric_names(global_metrics_ids)  # todo: make func
+    global_metrics_ids = [1]
+    global_metrics_names = get_global_metric_names(global_metrics_ids)
 
     print(f"{len(global_metrics_names)} global metrics names are: {global_metrics_names}")
 
@@ -126,7 +126,7 @@ def is_valid_sample(raw_sample, features_names):
 
 
 @timeit(message=None)
-def get_macrotrends_responses_method_b(companies_ids, date_str_list):
+def get_macrotrends_responses_method_b(companies_ids, date_str_list) -> object:
     dateticker_to_capprice_map = {}
     for date_str in tqdm(date_str_list, desc="looping over all given dates to get macrotrends responses", colour="CYAN"):
         ticker_list = get_tickers(companies_ids)

@@ -213,6 +213,9 @@ def create_golbal_features_select_list(global_features_ids):
 
 
 def create_global_feature(global_feature_id):
+    # return f"(select g.global_metric_value from shares.global_data g where g.global_metric_id = " \
+    #        f"{global_feature_id} and g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) " \
+    #        f"ORDER BY date ASC LIMIT 1) as global_feature{global_feature_id}"
+    #
     return f"(select g.global_metric_value from shares.global_data g where g.global_metric_id = " \
-           f"{global_feature_id} and g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) " \
-           f"ORDER BY date ASC LIMIT 1) as global_feature{global_feature_id}"
+           f"{global_feature_id} and g.date = dates.date) as global_feature{global_feature_id}"

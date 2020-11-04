@@ -1,4 +1,5 @@
 from utils import DateUtils, StrUtils
+from utils.DateUtils import get_business_date
 from utils.SqlUtils import get_connection_cursor
 from utils.TimerDecorator import timeit
 
@@ -14,8 +15,8 @@ def get_closing_price(date, ticker):
 
 def get_market_cap(date, ticker):
     connection, cursor = get_connection_cursor()
-    sql = f"select t.market_cap from shares.tickers_prices t where t.ticker = '{ticker}' and t.date >= '{date}' and " \
-          f"t.date < date_add('{date}',INTERVAL 5 DAY) ORDER BY date ASC LIMIT 1;"
+    business_day = DateUtils.get_business_date(date)
+    sql = f"select t.market_cap from shares.tickers_prices t where t.ticker = '{ticker}' and t.date = '{business_day}';"
 
     # print(f"sql is: {sql}")
     cursor.execute(sql)

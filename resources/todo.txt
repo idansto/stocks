@@ -1,13 +1,14 @@
 
 
 3-11-2020
-test that getting scores in both method return the same result
-try to use business dates for sampling building as well
+test that getting scores in both method return the same result - fixed issue
+try to use business dates for sampling building as well - saved a lot of time
 check odd values for some shares
 provide solution for logarithm issue
 change tables names
 show sql to Avi and ask for better solution
 ask Chaim what should I use?
+what to do with none values?
 
 
 
