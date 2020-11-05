@@ -73,6 +73,19 @@ def get_date_value_line(line):
 def populate_10_Year_Treasury_Rate():
     populate_general_metric_data_from_macrotrends(2016)
 
+def populate_fed_funds_rate_historical_chart():
+    populate_general_metric_data_from_macrotrends(2015)
+
+def populate_1_year_libor_rate_historical_chart():
+    populate_general_metric_data_from_macrotrends(2515)
+
+def populate_30_year_fixed_mortgage_rate_chart():
+    populate_general_metric_data_from_macrotrends(2604)
+
+def populate_historical_libor_rates_chart():
+    populate_general_metric_data_from_macrotrends(1433)
+
+
 
 def populate_general_metric_data_from_macrotrends(chart_id):
     connection, cursor = get_connection_cursor()
@@ -92,8 +105,9 @@ def populate_general_metric_data_from_macrotrends(chart_id):
                     tuple = (date, metric_id, value)
                     my_data.append(tuple)
 
-        sql = f"INSERT INTO shares.global_data (date, global_metric_id, global_metric_value) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE value=VALUES(value)"
+        sql = f"INSERT INTO shares.global_data (date, global_metric_id, global_metric_value) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE global_metric_value=VALUES(global_metric_value)"
         cursor.executemany(sql, my_data)
+        connection.commit()
     else:
         print(f"No info found for macrotrends general_metric id: {chart_id}")
 
