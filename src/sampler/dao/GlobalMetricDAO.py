@@ -41,11 +41,15 @@ def get_global_metric_ids(global_metric_names):
 
 
 @lru_cache(maxsize=1000)
-def get_global_metric_id(code):
+def get_global_metric_id(chart_id, key):
     connection, cursor = get_connection_cursor()
-    sql = 'select g.id from shares.global_data g where g.code =%s'
-    values = [code]
+    sql = 'select g.id from shares.global_metrics g where g.chart_id=%s AND g.sub_name=%s'
+    values = [chart_id, key]
     cursor.execute(sql, values)
-    (id, ) = cursor.fetchone()
+    result = cursor.fetchone()
+    if result:
+        (id,) = result
+    else:
+        id = None
     return id
 

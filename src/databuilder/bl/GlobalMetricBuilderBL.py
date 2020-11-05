@@ -76,6 +76,7 @@ def populate_10_Year_Treasury_Rate():
 
 def populate_general_metric_data_from_macrotrends(chart_id):
     connection, cursor = get_connection_cursor()
+    # TODO load only new data
     json_obj = get_json_from_macrotrends(chart_id)
     if (json_obj):
         my_data = []
@@ -84,13 +85,17 @@ def populate_general_metric_data_from_macrotrends(chart_id):
                 if key == 'date':
                     date = dic[key]
                 else:
-                    metric_id = GlobalMetricDAO.get_global_metric_id(key)
+                    metric_id = GlobalMetricDAO.get_global_metric_id(chart_id, key)
+                    if not metric_id:
+                        continue
                     value = dic[key]
                     tuple = (date, metric_id, value)
                     my_data.append(tuple)
 
-        sql = f"INSERT INTO shares.global_data (date, metric_id, value) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE value=VALUES(value)"
+        sql = f"INSERT INTO shares.global_data (date, global_metric_id, global_metric_value) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE value=VALUES(value)"
         cursor.executemany(sql, my_data)
+    else:
+        print(f"No info found for macrotrends general_metric id: {chart_id}")
 
 
 def get_json_from_macrotrends(chart_id):
@@ -114,9 +119,9 @@ def get_global_metrics_text_from_macrotrends(chart_id):
         print(f'failed to read url: {url}')
         return None
 
-originalData_pattern = re.compile('var originalData = (.+);\\s*var chart =')
+originalData_pattern = re.compile('var originalData = (.+);')
 
-def extract_original_data(text: object) -> object:
+def extract_original_data(text: object):
     match = originalData_pattern.search(text)
     if match:
         found = match.group(1)

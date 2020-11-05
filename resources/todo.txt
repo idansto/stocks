@@ -15,6 +15,9 @@ what to do with none values?
 
 
 
+
+
+
 Builders
     add more info to DB, such as Key Financial Ratios
 
