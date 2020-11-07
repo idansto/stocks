@@ -19,7 +19,7 @@ from collections import defaultdict
 
 
 def choose_companies():
-    companies_ids = range(1, 201)
+    companies_ids = range(1, 701)
     # companies_ids = [3]
     companies_tickers = get_tickers(companies_ids)
     # companies_tickers = ["LLY","TMO"]
@@ -30,7 +30,7 @@ def choose_companies():
 
 
 def choose_dates():
-    start_date = "2014-09-30"
+    start_date = "2012-09-30"
     end_date = "2020-09-30"
     date_str_list = get_quraterly_dates_between(start_date, end_date)
     print(f"Dates are: {len(date_str_list)} dates: ({start_date} -- {end_date})")
@@ -60,7 +60,7 @@ def choose_company_attributes():
 
 
 def choose_global_metrics():
-    global_metrics_ids = [2]
+    global_metrics_ids = [1,2]
     global_metrics_names = get_global_metric_names(global_metrics_ids)
 
     print(f"{len(global_metrics_names)} global metrics names are: {global_metrics_names}")
