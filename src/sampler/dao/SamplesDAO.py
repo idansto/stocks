@@ -217,5 +217,36 @@ def create_global_feature(global_feature_id):
     #        f"{global_feature_id} and g.date >= dates.date and g.date < date_add(dates.date,INTERVAL 5 DAY) " \
     #        f"ORDER BY date ASC LIMIT 1) as global_feature{global_feature_id}"
     #
-    return f"(select g.global_metric_value from shares.global_data g where g.global_metric_id = " \
-           f"{global_feature_id} and g.date = dates.date) as global_feature{global_feature_id}"
+    # SELECT g.global_metric_value FROM
+    # shares.global_data
+    # g
+    # where
+    # global_metric_id = 2 and (date = '2018-06-30' or date = date_add('2018-06-30', INTERVAL 1 DAY) or date = date_add(
+    #     '2018-06-30', INTERVAL 2 DAY) or date = date_add('2018-06-30', INTERVAL 3 DAY))
+    #     limit 1;
+    # SELECT
+    # g.global_metric_value
+    # FROM
+    # shares.global_data
+    # g
+    # inner
+    # join
+    # business_days
+    # b
+    # on
+    # g.date = b.business_day
+    # where
+    # b.date = '2018-06-30' and global_metric_id = 2
+
+    return f"(SELECT g.global_metric_value from shares.global_data g INNER JOIN business_days b " \
+           f"ON (g.date = b.business_day) WHERE b.date = dates.date AND global_metric_id = {global_feature_id}) " \
+           f"as global_feature{global_feature_id}"
+
+
+    # return f"(select g.global_metric_value from shares.global_data g where g.global_metric_id = {global_feature_id} and " \
+    #        f"(date = dates.date or date = date_add(dates.date, INTERVAL 1 DAY) " \
+    #        f"or date = date_add(dates.date, INTERVAL 2 DAY) or date = date_add(dates.date, INTERVAL 3 DAY)) limit 1) " \
+    #        f"as global_feature{global_feature_id}"
+
+    # return f"(select g.global_metric_value from shares.global_data g where g.global_metric_id = " \
+    #        f"{global_feature_id} and g.date = dates.date) as global_feature{global_feature_id}"

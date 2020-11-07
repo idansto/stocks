@@ -5,7 +5,7 @@ import pandas as pd
 import yfinance as yf
 from tqdm import tqdm
 
-from databuilder.bl import MarketCapBuilderBL
+from databuilder.bl import MarketCapBuilderBL, BusinessDaysBL
 from sampler.dao import TickersPricesDAO, LastUpdatedDAO
 from sampler.dao.CompaniesDAO import get_tickers, get_company_attribute_names, get_companies_ids
 from sampler.dao.ComapnyMetricsDAO import get_company_metrics_names
@@ -60,7 +60,7 @@ def choose_company_attributes():
 
 
 def choose_global_metrics():
-    global_metrics_ids = [1]
+    global_metrics_ids = [2]
     global_metrics_names = get_global_metric_names(global_metrics_ids)
 
     print(f"{len(global_metrics_names)} global metrics names are: {global_metrics_names}")
@@ -81,6 +81,9 @@ class Sampler:
 
         sample_field_names = global_metrics_names + company_attributes_names + company_metrics_names
         print(f"sample fields: {sample_field_names}")
+
+        # ensure business_days are filled
+        BusinessDaysBL.ensure_business_days(date_str_list)
 
         # get samples from DB
         raw_samples = get_samples_list_with_all(companies_ids, date_str_list, global_metrics_ids, company_attributes_ids, company_metrics_ids)
